@@ -1,18 +1,16 @@
 #include <iostream>
-#include <cmath>
 #include "Pythia8/Pythia.h"
 
 using namespace Pythia8;
 
 int main(){
-    int nEvents = 10;
+    //First Attempt at 25 event gluon fusion channel (ggH)
+    int nEvents = 25;
     Pythia8::Pythia pythia;
 
-    pythia.readString("Beams:idA = 2212");
-    pythia.readString("Beams:idB = 2212");
-    pythia.readString("Beams:eCM = 14.e3");
-
-    pythia.init();
+    pythia.readString("Beams:idA = 21");
+    pythia.readString("Beams:idB = 21");
+    pythia.readString("Beams:eCM = 13.e3");
 
     //Generates {nEvents} events
     for(int i = 0; i < nEvents; i++){
@@ -40,5 +38,6 @@ int main(){
         }
     }
 
+    pythia.init();
     return 0;
 }
