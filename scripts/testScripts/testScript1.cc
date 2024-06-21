@@ -11,6 +11,8 @@ int main(){
     pythia.readString("Beams:idA = 2212");
     pythia.readString("Beams:idB = 2212");
     pythia.readString("Beams:eCM = 14.e3");
+    pythia.readString("SoftQCD:all = on");
+    pythia.readString("HardQCD:all = on");
 
     pythia.init();
 
