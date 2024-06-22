@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 #include "Pythia8/Pythia.h"
 
 using namespace Pythia8;
@@ -11,6 +12,10 @@ int main(){
     pythia.readString("Beams:idA = 21");
     pythia.readString("Beams:idB = 21");
     pythia.readString("Beams:eCM = 13.e3");
+    pythia.readString("SoftQCD:all = on");
+    pythia.readString("HardQCD:all = on");
+    
+    pythia.init();
 
     //Generates {nEvents} events
     for(int i = 0; i < nEvents; i++){
@@ -34,10 +39,9 @@ int main(){
 
             double eta = pythia.event[j].eta();
 
-            std::cout << "Entry: " << id << " > " << mass << " > " << pabs << std::endl;
+            std::cout << "Entry: " << id << " > Mass: " << mass << " > Momentum: " << pabs << std::endl;
         }
     }
 
-    pythia.init();
     return 0;
 }
