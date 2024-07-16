@@ -1,18 +1,21 @@
 #include <iostream>
 #include <cmath>
 #include <fstream>
+#include <string>
 #include "Pythia8/Pythia.h"
 
 #ifdef _WIN32
-    // Windows-specific includes or empty include
-#else
-    #include <dlfcn.h> // Only include for non-Windows platforms
-#endif
-
-#ifdef _WIN32
     #define EXPORT __declspec(dllexport)
+    #define DYNAMIC_LOAD_SUPPORTED 0
 #else
     #define EXPORT __attribute__ ((visibility ("default")))
+    #define DYNAMIC_LOAD_SUPPORTED 1
+#endif
+
+#if !DYNAMIC_LOAD_SUPPORTED
+    #define dlopen(a,b) (void*)(a)
+    #define dlsym(a,b) (void*)(b)
+    #define dlclose(a) (void)(a)
 #endif
 
 void generateParticleData(const char* outputFilePath) {
