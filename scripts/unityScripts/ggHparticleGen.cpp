@@ -4,6 +4,12 @@
 #include "Pythia8/Pythia.h"
 
 #ifdef _WIN32
+    // Windows-specific includes or empty include
+#else
+    #include <dlfcn.h> // Only include for non-Windows platforms
+#endif
+
+#ifdef _WIN32
     #define EXPORT __declspec(dllexport)
 #else
     #define EXPORT __attribute__ ((visibility ("default")))
