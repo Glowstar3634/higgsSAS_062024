@@ -12,7 +12,9 @@
     #define DYNAMIC_LOAD_SUPPORTED 1
 #endif
 
-#if !DYNAMIC_LOAD_SUPPORTED
+#if DYNAMIC_LOAD_SUPPORTED
+    #include <dlfcn.h>
+#else
     #define dlopen(a,b) (void*)(a)
     #define dlsym(a,b) (void*)(b)
     #define dlclose(a) (void)(a)
