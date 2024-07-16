@@ -3,10 +3,10 @@
 #include <fstream>
 #include "Pythia8/Pythia.h"
 
-extern "C" {
+extern "C" __declspec(dllexport) void GenerateEvents() {
     void generateParticleData(const char* outputFilePath) {
         using namespace Pythia8;
-        int nEvents = 100;
+        int nEvents = 25;
         Pythia pythia;
 
         pythia.readString("Random:setSeed = on");
