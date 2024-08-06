@@ -1,14 +1,14 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const { exec } = require('child_process');
+import express from 'express';
+import { json } from 'body-parser';
+import { exec } from 'child_process';
 const app = express();
 const port = 3000;
 
-app.use(bodyParser.json());
+app.use(json());
 
 app.post('/generate', (req, res) => {
-    const outputFilePath = 'output.csv';
-    exec(`./generateParticleData ${outputFilePath}`, (error, stdout, stderr) => {
+    const outputFilePath = 'particleData1_01.csv';
+    exec(`/home/azureuser/pythia8312/scripts/testScript2_06 ${outputFilePath}`, (error, stdout, stderr) => {
         if (error) {
             console.error(`Error: ${error.message}`);
             return res.status(500).send('Error generating data');
