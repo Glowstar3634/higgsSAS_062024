@@ -33,15 +33,20 @@ int main(){
         //Collects data from each entry in the event
         for(int j = 0; j < entries; j++) {
             int id = pythia.event[j].id();
+            double mass = pythia.event[j].m();
+            double px = pythia.event[j].px();
+            double py = pythia.event[j].py();
+            double pz = pythia.event[j].pz();
+            double pabs = sqrt(pow(px, 2) + pow(py, 2) + pow(pz, 2));
+            double eta = pythia.event[j].eta();
             if (id == 25 || id == 35 || id == 36 || id == 37) {  // Look for Higgs bosons
-                double mass = pythia.event[j].m();
-                double px = pythia.event[j].px();
-                double py = pythia.event[j].py();
-                double pz = pythia.event[j].pz();
-                double pabs = sqrt(pow(px, 2) + pow(py, 2) + pow(pz, 2));
-                double eta = pythia.event[j].eta();
-
                 std::cout << "Higgs Entry: " << id 
+                          << " > Mass: " << mass 
+                          << " > Momentum: " << pabs 
+                          << " > Eta: " << eta 
+                          << std::endl;
+            }else{
+                std::cout << "Entry: " << id 
                           << " > Mass: " << mass 
                           << " > Momentum: " << pabs 
                           << " > Eta: " << eta 
