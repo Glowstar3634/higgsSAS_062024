@@ -10,7 +10,7 @@ int main(){
     Pythia8::Pythia pythia;
 
     pythia.readString("Random:setSeed = on");
-    pythia.readString("Random:seed = " + std::to_string(time(0)));
+    pythia.readString("Random:seed = 0");
 
     pythia.readString("Beams:idA = 2212");
     pythia.readString("Beams:idB = 2212");
