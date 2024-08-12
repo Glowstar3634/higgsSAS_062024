@@ -6,7 +6,7 @@ const app = express();
 const port = 3000;
 
 app.get('/generate', (req, res) => {
-    exec('/home/azureuser/pythia8312/scripts/testScript2_08 /home/azureuser/pythia8312/scripts/particleData2_08.csv', { maxBuffer: 5 * 1024 * 1024 }, (error, stdout, stderr) => {
+    exec('/home/azureuser/pythia8312/scripts/testScript3_01 /home/azureuser/pythia8312/scripts/particleData3_01.csv', { maxBuffer: 5 * 1024 * 1024 }, (error, stdout, stderr) => {
         if (error) {
             console.error(`exec error: ${error}`);
             res.status(500).send(`Error: ${error.message}`);
@@ -18,7 +18,7 @@ app.get('/generate', (req, res) => {
             return;
         }
         console.log(`stdout: ${stdout}`);
-        res.sendFile(path.resolve('/home/azureuser/pythia8312/scripts/particleData2_08.csv'));
+        res.sendFile(path.resolve('/home/azureuser/pythia8312/scripts/particleData3_01.csv'));
     });
 });
 
