@@ -46,7 +46,7 @@ int main(int argc, char* argv[]){
             double pabs = sqrt(pow(px, 2) + pow(py, 2) + pow(pz, 2));
             double eta = pythia.event[j].eta();
 
-            outFile << id << ',' << mass << ',' << pabs << ',' << eta << "\n"
+            outFile << id << ',' << mass << ',' << pabs << ',' << eta << "\n";
         }
     }
 
