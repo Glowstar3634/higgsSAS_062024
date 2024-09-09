@@ -29,8 +29,7 @@ int main(int argc, char* argv[]){
     pythia.readString("HardQCD:all = on");
     pythia.readString("HiggsSM:ff2Hff(t:ZZ) = on");
     pythia.readString("HiggsSM:ff2Hff(t:WW) = on");
-
-    pythia.readString("25:onMode = off") //Disable all Higgs Decays
+    pythia.readString("25:onMode = off");
 
     pythia.init();
 
