@@ -3,7 +3,7 @@ const express = require('express');
 const { exec } = require('child_process');
 const path = require('path');
 const app = express();
-const port = 3000;
+const port = 8080;
 
 app.get('/generate', (req, res) => {
     exec('/home/ubuntu/pythia8312/scripts/pgen1.02ggHND /home/ubuntu/pythia8312/scripts/particleData4_01.csv', { maxBuffer: 3 * 1024 * 1024 }, (error, stdout, stderr) => {
