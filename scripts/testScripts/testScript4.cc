@@ -74,7 +74,7 @@ int main(int argc, char* argv[]) {
             double pz_tot = pz1 + pz2;
             double invariantMass = sqrt(E_tot * E_tot - (px_tot * px_tot + py_tot * py_tot + pz_tot * pz_tot));
 
-            outFile << "Invariant Mass: " << invariantMass << "\n";
+            outFile << "Invariant Mass of Photon Product Pair: " << invariantMass << "\n";
         }
     }
 
