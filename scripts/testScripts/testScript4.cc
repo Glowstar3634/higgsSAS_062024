@@ -56,12 +56,10 @@ int main(int argc, char* argv[]) {
                     hggCount++;
                 }
 
-                if(decayProducts.size() != 1 || decayProducts[0] != 25){ 
-                    totalHCount++;
+                if (!decayProducts.empty() && !(decayProducts.size() == 1 && decayProducts[0] == 25)) {
+                    totalHCount++;  // Count only if there are valid decay products (not 25)
                 }
 
-                // Output decay products for analysis (optional)
-                outFile << "Higgs Decay Products: ";
                 for (int id : decayProducts) {
                     outFile << id << " ";
                 }
