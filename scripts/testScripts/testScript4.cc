@@ -27,16 +27,14 @@ int main(int argc, char* argv[]) {
     pythia.readString("Beams:idB = 2212");
     pythia.readString("Beams:eCM = 13.e3");
 
-    // Enable Higgs production
     pythia.readString("HiggsSM:gg2H = on");
-
-    // Allow the Higgs to decay into all possible modes
     pythia.readString("25:onMode = on");
+
+    pythia.readString("ParticleDecays:useRunningWidths = on");
 
     pythia.init();
 
-    // Variables to count decay channels
-    int hggCount = 0;  // Count for H → γγ
+    int hggCount = 0;
     int totalHCount = 0;
 
     // Event loop
@@ -45,10 +43,8 @@ int main(int argc, char* argv[]) {
 
         // Analyze Higgs decays
         for (int j = 0; j < pythia.event.size(); j++) {
-            if (pythia.event[j].id() == 25) {  // Check if particle is a Higgs boson
-                totalHCount++;
+            if (pythia.event[j].id() == 25) {
 
-                // Check the decay products of the Higgs
                 std::vector<int> decayProducts;
                 for (int k = 0; k < pythia.event.size(); k++) {
                     if (pythia.event[k].mother1() == j) {  // Check if the particle comes from this Higgs
@@ -56,11 +52,14 @@ int main(int argc, char* argv[]) {
                     }
                 }
 
-                // Check for H → γγ channel
                 if (decayProducts.size() == 2 && 
                     decayProducts[0] == 22 && 
                     decayProducts[1] == 22) {
                     hggCount++;
+                }
+
+                if(decayProducts.size() != 1 || decayProducts[0] != 25){ 
+                    totalHCount++;
                 }
 
                 // Output decay products for analysis (optional)
@@ -75,8 +74,8 @@ int main(int argc, char* argv[]) {
 
     // Output decay channel statistics
     outFile << "\nTotal Higgs Decays: " << totalHCount << "\n";
-    outFile << "H → γγ Count: " << hggCount << "\n";
-    outFile << "H → γγ Ratio: " << static_cast<double>(hggCount) / totalHCount << "\n";
+    outFile << "H2P Count: " << hggCount << "\n";
+    outFile << "H2P Ratio: " << static_cast<double>(hggCount) / totalHCount << "\n";
 
     outFile.close();
     return 0;
