@@ -25,61 +25,58 @@ int main(int argc, char* argv[]) {
 
     pythia.readString("Beams:idA = 2212");
     pythia.readString("Beams:idB = 2212");
-    pythia.readString("Beams:eCM = 13000.");
+    pythia.readString("Beams:eCM = 13.e3");
 
-    pythia.readString("Tune:pp = 14");//tuning
-
+    // Enable Higgs production
     pythia.readString("HiggsSM:gg2H = on");
-    pythia.readString("25:onMode = off");
-    pythia.readString("25:onIfMatch = 22 22");
+
+    // Allow the Higgs to decay into all possible modes
+    pythia.readString("25:onMode = on");
 
     pythia.init();
 
+    // Variables to count decay channels
+    int hggCount = 0;  // Count for H → γγ
+    int totalHCount = 0;
+
+    // Event loop
     for (int i = 0; i < nEvents; i++) {
         if (!pythia.next()) continue;
 
-        std::vector<std::vector<Particle>> higgsPhotonPairs;
-
+        // Analyze Higgs decays
         for (int j = 0; j < pythia.event.size(); j++) {
-            if (pythia.event[j].id() == 25) { 
-                std::vector<Particle> photons;
+            if (pythia.event[j].id() == 25) {  // Check if particle is a Higgs boson
+                totalHCount++;
 
+                // Check the decay products of the Higgs
+                std::vector<int> decayProducts;
                 for (int k = 0; k < pythia.event.size(); k++) {
-                    if (pythia.event[k].id() == 22 && pythia.event[k].mother1() == j) {
-                        if (pythia.event[k].pT() > 25.0 && std::abs(pythia.event[k].eta()) < 2.5) {//kinematic cuts
-                            photons.push_back(pythia.event[k]);
-                        }
+                    if (pythia.event[k].mother1() == j) {  // Check if the particle comes from this Higgs
+                        decayProducts.push_back(pythia.event[k].id());
                     }
                 }
 
-                if (photons.size() == 2) {
-                    higgsPhotonPairs.push_back(photons);
+                // Check for H → γγ channel
+                if (decayProducts.size() == 2 && 
+                    decayProducts[0] == 22 && 
+                    decayProducts[1] == 22) {
+                    hggCount++;
                 }
+
+                // Output decay products for analysis (optional)
+                outFile << "Higgs Decay Products: ";
+                for (int id : decayProducts) {
+                    outFile << id << " ";
+                }
+                outFile << "\n";
             }
-        }
-
-        for (const auto& pair : higgsPhotonPairs) {
-            double E1 = pair[0].e();
-            double px1 = pair[0].px();
-            double py1 = pair[0].py();
-            double pz1 = pair[0].pz();
-
-            double E2 = pair[1].e();
-            double px2 = pair[1].px();
-            double py2 = pair[1].py();
-            double pz2 = pair[1].pz();
-
-            double E_tot = E1 + E2;
-            double px_tot = px1 + px2;
-            double py_tot = py1 + py2;
-            double pz_tot = pz1 + pz2;
-            double invariantMass = sqrt(E_tot * E_tot - (px_tot * px_tot + py_tot * py_tot + pz_tot * pz_tot));
-
-            outFile << invariantMass << "\n";
         }
     }
 
-    pythia.stat();
+    // Output decay channel statistics
+    outFile << "\nTotal Higgs Decays: " << totalHCount << "\n";
+    outFile << "H → γγ Count: " << hggCount << "\n";
+    outFile << "H → γγ Ratio: " << static_cast<double>(hggCount) / totalHCount << "\n";
 
     outFile.close();
     return 0;
