@@ -30,8 +30,6 @@ int main(int argc, char* argv[]) {
     pythia.readString("HiggsSM:gg2H = on");
     pythia.readString("25:onMode = on");
 
-    pythia.readString("ParticleDecays:useRunningWidths = on");
-
     pythia.init();
 
     int hggCount = 0;
