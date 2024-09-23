@@ -25,20 +25,20 @@ int main(int argc, char* argv[]) {
 
     pythia.readString("Beams:idA = 2212");
     pythia.readString("Beams:idB = 2212");
-    pythia.readString("Beams:eCM = 13.e3");
+    pythia.readString("Beams:eCM = 13000.");
 
-    // Higgs production and decay settings (gg > H > 2p)
-    pythia.readString("HiggsSM:gg2H = on"); 
+    pythia.readString("Tune:pp = 14");//tuning
+
+    pythia.readString("HiggsSM:gg2H = on");
     pythia.readString("25:onMode = off");
     pythia.readString("25:onIfMatch = 22 22");
 
     pythia.init();
 
-    // Event loop
     for (int i = 0; i < nEvents; i++) {
         if (!pythia.next()) continue;
 
-        std::vector<std::vector<Particle>> higgsPhotonPairs; // Vector for storing pairs of photons for each Higgs
+        std::vector<std::vector<Particle>> higgsPhotonPairs;
 
         for (int j = 0; j < pythia.event.size(); j++) {
             if (pythia.event[j].id() == 25) { 
@@ -46,17 +46,18 @@ int main(int argc, char* argv[]) {
 
                 for (int k = 0; k < pythia.event.size(); k++) {
                     if (pythia.event[k].id() == 22 && pythia.event[k].mother1() == j) {
-                        photons.push_back(pythia.event[k]);
+                        if (pythia.event[k].pT() > 25.0 && std::abs(pythia.event[k].eta()) < 2.5) {//kinematic cuts
+                            photons.push_back(pythia.event[k]);
+                        }
                     }
                 }
 
                 if (photons.size() == 2) {
-                    higgsPhotonPairs.push_back(photons); // Save this pair
+                    higgsPhotonPairs.push_back(photons);
                 }
             }
         }
 
-        //Invariant mass calculations
         for (const auto& pair : higgsPhotonPairs) {
             double E1 = pair[0].e();
             double px1 = pair[0].px();
@@ -74,10 +75,11 @@ int main(int argc, char* argv[]) {
             double pz_tot = pz1 + pz2;
             double invariantMass = sqrt(E_tot * E_tot - (px_tot * px_tot + py_tot * py_tot + pz_tot * pz_tot));
 
-            outFile << "Invariant Mass of Photon Product Pair: " << invariantMass << "\n";
+            outFile << invariantMass << "\n";
         }
     }
 
+    pythia.stat();
 
     outFile.close();
     return 0;
