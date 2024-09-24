@@ -41,7 +41,9 @@ int main(int argc, char* argv[]) {
 
         // Analyze Higgs decays
         for (int j = 0; j < pythia.event.size(); j++) {
-            if (pythia.event[j].id() == 25) {
+            // Check if particle is Higgs and has decayed
+            if (pythia.event[j].id() == 25 && pythia.event[j].status() == -22) {
+                totalHCount++;  // Count each Higgs that decays
 
                 std::vector<int> decayProducts;
                 for (int k = 0; k < pythia.event.size(); k++) {
@@ -50,16 +52,14 @@ int main(int argc, char* argv[]) {
                     }
                 }
 
+                // Check for H -> gamma gamma channel
                 if (decayProducts.size() == 2 && 
                     decayProducts[0] == 22 && 
                     decayProducts[1] == 22) {
                     hggCount++;
                 }
 
-                if (!decayProducts.empty() && !(decayProducts.size() == 1 && decayProducts[0] == 25)) {
-                    totalHCount++;  // Count only if there are valid decay products (not 25)
-                }
-
+                // Output decay products for further analysis
                 for (int id : decayProducts) {
                     outFile << id << " ";
                 }
@@ -69,9 +69,8 @@ int main(int argc, char* argv[]) {
     }
 
     // Output decay channel statistics
-    outFile << "\nTotal Higgs Decays: " << totalHCount << "\n";
-    outFile << "H2P Count: " << hggCount << "\n";
-    outFile << "H2P Ratio: " << static_cast<double>(hggCount) / totalHCount << "\n";
+    outFile << "\nTotalHiggsDecays: " << totalHCount << "\n";
+    outFile << "H2PRatio: " << static_cast<double>(hggCount) / totalHCount << "\n";
 
     outFile.close();
     return 0;
