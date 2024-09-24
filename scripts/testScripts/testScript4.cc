@@ -41,13 +41,13 @@ int main(int argc, char* argv[]) {
 
         // Analyze Higgs decays
         for (int j = 0; j < pythia.event.size(); j++) {
-            // Check if particle is Higgs and has decayed
-            if (pythia.event[j].id() == 25 && pythia.event[j].status() == -22) {
+            if (pythia.event[j].id() == 25 && pythia.event[j].status() >= 62) {
                 totalHCount++;  // Count each Higgs that decays
 
                 std::vector<int> decayProducts;
                 for (int k = 0; k < pythia.event.size(); k++) {
-                    if (pythia.event[k].mother1() == j) {  // Check if the particle comes from this Higgs
+                    if (pythia.event[k].mother1() == j || pythia.event[k].mother2() == j) {  
+                        // Check if the particle comes from this Higgs
                         decayProducts.push_back(pythia.event[k].id());
                     }
                 }
