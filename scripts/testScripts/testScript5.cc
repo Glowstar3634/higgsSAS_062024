@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
 
                 std::vector<int> decayProducts;
                 for (int k = 0; k < pythia.event.size(); k++) {
-                    if ((pythia.event[k].mother1() == j || pythia.event[k].mother2() == j) && pythia.event[k].status() == 91) {  
+                    if ((pythia.event[k].mother1() == j || pythia.event[k].mother2() == j)) {  
                         decayProducts.push_back(pythia.event[k].id());
                     }
                 }
@@ -58,7 +58,6 @@ int main(int argc, char* argv[]) {
                     hggCount++;
                 }
 
-                // Output decay products for further analysis
                 outFile << "Higgsdec" << pythia.event[j].status() << " ";
                 for (int id : decayProducts) {
                     outFile << id << " ";
