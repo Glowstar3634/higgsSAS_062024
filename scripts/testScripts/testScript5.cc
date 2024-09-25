@@ -41,21 +41,18 @@ int main(int argc, char* argv[]) {
 
         // Analyze Higgs decays
         for (int j = 0; j < pythia.event.size(); j++) {
-            if (pythia.event[j].id() == 25 && (pythia.event[j].status() == -22 || pythia.event[j].status() == 22 || pythia.event[j].status() == -23 || pythia.event[j].status() == 23)) {
+            if (pythia.event[j].id() == 25 && (pythia.event[j].status() == 23)) {
                 totalHCount++;
 
                 std::vector<int> decayProducts;
                 for (int k = 0; k < pythia.event.size(); k++) {
-                    if (pythia.event[k].mother1() == j || pythia.event[k].mother2() == j) {  
-                        // Check if the particle comes from this Higgs
+                    if ((pythia.event[k].mother1() == j || pythia.event[k].mother2() == j) && pythia.event[k].status() == 91) {  
                         decayProducts.push_back(pythia.event[k].id());
                     }
                 }
 
                 // Check for H -> gamma gamma channel
-                if (decayProducts.size() == 2 && 
-                    decayProducts[0] == 22 && 
-                    decayProducts[1] == 22) {
+                if (decayProducts.size() == 2 && decayProducts[0] == 22 && decayProducts[1] == 22) {
                     hggCount++;
                 }
 
@@ -66,7 +63,7 @@ int main(int argc, char* argv[]) {
                 outFile << "\n";
             }
             else if (pythia.event[j].id() == 25) {
-                outFile << "Higgsnodecay" << pythia.event[j].status() << "\n";
+                outFile << "Higgselse" << pythia.event[j].status() << "\n";
             }
         }
     }
