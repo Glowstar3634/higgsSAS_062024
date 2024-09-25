@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
         // Analyze Higgs decays
         for (int j = 0; j < pythia.event.size(); j++) {
             std::vector<int> validStatuses = {-62, -22, -44}; //Decayed Higgs
-            if (pythia.event[j].id() == 25 && (std::find(validStatuses.begin(), validStatuses.end(), pythia.event[j].status()) != validStatuses.end())) {
+            if (pythia.event[j].id() == 25) {
                 totalHCount++;
 
                 std::vector<int> decayProducts;
