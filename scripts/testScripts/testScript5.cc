@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
                 outFile << "\n";
             }
             else if (pythia.event[j].id() == 25) {
-                outFile << "Higgsnodecay\n";
+                outFile << "Higgsnodecay" << pythia.event[j].status() << "\n";
             }
         }
     }
