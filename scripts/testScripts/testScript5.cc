@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cmath>
 #include <vector>
+#include <algorithm>
 #include "Pythia8/Pythia.h"
 
 using namespace Pythia8;
@@ -41,7 +42,8 @@ int main(int argc, char* argv[]) {
 
         // Analyze Higgs decays
         for (int j = 0; j < pythia.event.size(); j++) {
-            if (pythia.event[j].id() == 25 && (pythia.event[j].status() == 23)) {
+            std::vector<int> validStatuses = {-62, -22, -44}; //Decayed Higgs
+            if (pythia.event[j].id() == 25 && (std::find(validStatuses.begin(), validStatuses.end(), pythia.event[j].status()) != validStatuses.end())) {
                 totalHCount++;
 
                 std::vector<int> decayProducts;
@@ -57,6 +59,7 @@ int main(int argc, char* argv[]) {
                 }
 
                 // Output decay products for further analysis
+                outfile << "Higgsdec" << pythia.event[j].status() << " ";
                 for (int id : decayProducts) {
                     outFile << id << " ";
                 }
