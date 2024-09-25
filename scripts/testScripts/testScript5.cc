@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
                 }
 
                 // Output decay products for further analysis
-                outfile << "Higgsdec" << pythia.event[j].status() << " ";
+                outFile << "Higgsdec" << pythia.event[j].status() << " ";
                 for (int id : decayProducts) {
                     outFile << id << " ";
                 }
