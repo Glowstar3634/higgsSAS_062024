@@ -41,8 +41,8 @@ int main(int argc, char* argv[]) {
 
         // Analyze Higgs decays
         for (int j = 0; j < pythia.event.size(); j++) {
-            if (pythia.event[j].id() == 25 && pythia.event[j].status() >= 62) {
-                totalHCount++;  // Count each Higgs that decays
+            if (pythia.event[j].id() == 25 && (pythia.event[j].status() == -22 || pythia.event[j].status() == 22 || pythia.event[j].status() == -23 || pythia.event[j].status() == 23)) {
+                totalHCount++;
 
                 std::vector<int> decayProducts;
                 for (int k = 0; k < pythia.event.size(); k++) {
@@ -64,6 +64,9 @@ int main(int argc, char* argv[]) {
                     outFile << id << " ";
                 }
                 outFile << "\n";
+            }
+            else if (pythia.event[j].id() == 25) {
+                outFile << "Higgsnodecay\n"
             }
         }
     }

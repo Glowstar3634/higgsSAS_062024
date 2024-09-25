@@ -6,7 +6,7 @@ const app = express();
 const port = 8080;
 
 app.get('/generate', (req, res) => {
-    exec('/home/ubuntu/pythia8312/scripts/pgen5.07 /home/ubuntu/pythia8312/scripts/particleData5_07.csv', { maxBuffer: 5 * 1024 * 1024 }, (error, stdout, stderr) => {
+    exec('/home/ubuntu/pythia8312/scripts/pgen5.08 /home/ubuntu/pythia8312/scripts/particleData5_08.csv', { maxBuffer: 5 * 1024 * 1024 }, (error, stdout, stderr) => {
         if (error) {
             console.error(`exec error: ${error}`);
             res.status(500).send(`Error: ${error.message}`);
@@ -18,7 +18,7 @@ app.get('/generate', (req, res) => {
             return;
         }
         console.log(`stdout: ${stdout}`);
-        res.sendFile(path.resolve('/home/ubuntu/pythia8312/scripts/particleData5_07.csv'));
+        res.sendFile(path.resolve('/home/ubuntu/pythia8312/scripts/particleData5_08.csv'));
     });
 });
 
