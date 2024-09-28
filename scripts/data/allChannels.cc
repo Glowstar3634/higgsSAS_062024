@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    int nEvents = 100000;
+    int nEvents = 10000;
     Pythia pythia;
 
     pythia.readString("Random:setSeed = on");
