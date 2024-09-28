@@ -1,24 +1,32 @@
-//Testing...
 const express = require('express');
-const { exec } = require('child_process');
+const { spawn } = require('child_process');
 const path = require('path');
 const app = express();
 const port = 8080;
 
 app.get('/generate', (req, res) => {
-    exec('/home/ubuntu/pythia8312/scripts/pgen6.01 /home/ubuntu/pythia8312/scripts/particleData6_01.csv', { maxBuffer: 10 * 1024 * 1024 }, (error, stdout, stderr) => {
-        if (error) {
-            console.error(`exec error: ${error}`);
-            res.status(500).send(`Error: ${error.message}`);
-            return;
+    const child = spawn('/home/ubuntu/pythia8312/scripts/pgen6.01', ['/home/ubuntu/pythia8312/scripts/particleData6_01.csv']);
+
+    child.stdout.on('data', (data) => {
+        console.log(`stdout: ${data}`);
+    });
+
+    child.stderr.on('data', (data) => {
+        console.error(`stderr: ${data}`);
+    });
+
+    child.on('error', (error) => {
+        console.error(`exec error: ${error}`);
+        res.status(500).send(`Error: ${error.message}`);
+    });
+
+    child.on('close', (code) => {
+        console.log(`Child process exited with code ${code}`);
+        if (code === 0) {
+            res.sendFile(path.resolve('/home/ubuntu/pythia8312/scripts/particleData6_01.csv'));
+        } else {
+            res.status(500).send(`Process failed with exit code ${code}`);
         }
-        if (stderr) {
-            console.error(`stderr: ${stderr}`);
-            res.status(500).send(`Error: ${stderr}`);
-            return;
-        }
-        console.log(`stdout: ${stdout}`);
-        res.sendFile(path.resolve('/home/ubuntu/pythia8312/scripts/particleData6_01.csv'));
     });
 });
 
