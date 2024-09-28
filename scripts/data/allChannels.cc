@@ -33,10 +33,7 @@ int main(int argc, char* argv[]) {
     pythia.readString("Beams:idB = 2212");
     pythia.readString("Beams:eCM = 13.e3");
 
-    pythia.readString("HiggsSM:gg2H = on");
-    pythia.readString("HiggsSM:qqbar2Hqq = on");
-    pythia.readString("HiggsSM:qq2H = on");
-    pythia.readString("HiggsSM:gg2Hg = on");
+    pythia.readString("HiggsSM:all  = on");
     pythia.readString("25:onMode = on");
 
     pythia.init();
