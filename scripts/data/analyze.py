@@ -4,7 +4,8 @@ import sys
 
 def plot_histogram(data, parameter, fixed_value):
     # Ensure fixed_value is of the correct type
-    fixed_value = int(fixed_value)
+    if parameter == "production_channel":
+        fixed_value = int(fixed_value)
     
     # Filter the data based on the fixed parameter
     print(data.head())
