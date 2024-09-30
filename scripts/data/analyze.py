@@ -4,12 +4,15 @@ import sys
 
 def plot_histogram(data, parameter, fixed_value):
     # Filter the data based on the fixed parameter
+    print(data.head())
     if parameter == "production_channel":
+        print("Fixed Production, plotting decays...")
         filtered_data = data[data['ProductionChannel'] == fixed_value]
         ratios = filtered_data['DecayProducts'].value_counts(normalize=True)
         title = f'Decay Product Ratios for Production Channel {fixed_value}'
         xlabel = 'Decay Products'
     elif parameter == "decay_products":
+        print("Fixed Decays, plotting production...")
         filtered_data = data[data['DecayProducts'].str.contains(fixed_value)]
         ratios = filtered_data['ProductionChannel'].value_counts(normalize=True)
         title = f'Production Channel Ratios for Decay Products {fixed_value}'
