@@ -24,7 +24,7 @@ def plot_histogram(data, parameter, fixed_value):
         xlabel = 'Decay Products'
     elif parameter == "decay_products":
         print(f"Filtering for Decay Products containing {fixed_value}...")
-        filtered_data = data[data['DecayProducts'].str.contains(fixed_value)]
+        filtered_data = data[data['DecayProducts'].str.contains(fixed_value, regex=False)]
         
         # Debug: Print the filtered data
         print(f"Filtered data (first 5 rows):\n{filtered_data.head()}")
