@@ -12,9 +12,7 @@ def plot_histogram(data, parameter, fixed_value):
     if parameter == "production_channel":
         print(f"Filtering for Production Channel {fixed_value}...")
         filtered_data = data[data['ProductionChannel'] == fixed_value]
-        
-        # Debug: Print the filtered data
-        print(f"Filtered data (first 5 rows):\n{filtered_data.head()}")
+        print(f"Total:\n{len(filtered_data)}")
         
         if filtered_data.empty:
             print("No matching data found for this production channel.")
@@ -26,10 +24,8 @@ def plot_histogram(data, parameter, fixed_value):
     elif parameter == "decay_products":
         print(f"Filtering for Decay Products containing {fixed_value}...")
         filtered_data = data[data['DecayProducts'].str.contains(fixed_value, regex=False)]
-        
-        # Debug: Print the filtered data
-        print(f"Filtered data (first 5 rows):\n{filtered_data.head()}")
-        
+        print(f"Total:\n{len(filtered_data)}")
+
         if filtered_data.empty:
             print("No matching data found for these decay products.")
             return
