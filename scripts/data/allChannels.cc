@@ -7,8 +7,11 @@
 
 using namespace Pythia8;
 
-double invariantMass(Vec4 p1, Vec4 p2) {
-    Vec4 total = p1 + p2;
+double invariantMass(const std::vector<Vec4>& momenta) {
+    Vec4 total;
+    for (const auto& p : momenta) {
+        total += p;
+    }
     return total.mCalc();
 }
 
@@ -40,19 +43,21 @@ int main(int argc, char* argv[]) {
 
     int totalHCount = 0;
 
-    // Event loop
+    outFile << "ProductionChannel,DecayProducts,InvMasses\n";
+
+    //Event loop
     for (int i = 0; i < nEvents; i++) {
         if (!pythia.next()) continue;
 
-        // Analyze Higgs decays
+        //Analyze decays of detected Higgs particles only
         for (int j = 0; j < pythia.event.size(); j++) {
-            std::vector<int> validStatuses = {-62}; // Decayed Higgs
+            std::vector<int> validStatuses = {-62}; //decayed (placed in array for future alteration)
             if (pythia.event[j].id() == 25 && (std::find(validStatuses.begin(), validStatuses.end(), pythia.event[j].status()) != validStatuses.end())) {
                 totalHCount++;
 
                 std::vector<int> decayProducts;
                 std::vector<Vec4> momenta;
-                int productionChannel = pythia.info.code(); // Record the process ID
+                int productionChannel = pythia.info.code();
 
                 for (int k = 0; k < pythia.event.size(); k++) {
                     if (pythia.event[k].mother1() == j || pythia.event[k].mother2() == j) {  
@@ -61,31 +66,41 @@ int main(int argc, char* argv[]) {
                     }
                 }
 
-                // Output production channel
-                outFile << "ProductionChannel: " << productionChannel << ",";
+                //Output decay products and their invariant masses
+                if (decayProducts.size() >= 2) {
+                    outFile << productionChannel << ",";
 
-                // Output decay products and their invariant masses
-                for (int i = 0; i < decayProducts.size(); i++) {
-                    if (i == decayProducts.size() - 1) {
-                        outFile << decayProducts[i] << "\n";
-                    } else {
-                        outFile << decayProducts[i] << ",";
+                    for (size_t d = 0; d < decayProducts.size(); d++) {
+                        outFile << decayProducts[d];
+                        if (d < decayProducts.size() - 1) outFile << ";"; 
                     }
-                }
+                    outFile << ",";
 
-                // Calculate invariant masses for each pair of products
-                for (size_t a = 0; a < momenta.size(); a++) {
-                    for (size_t b = a + 1; b < momenta.size(); b++) {
-                        double invMass = invariantMass(momenta[a], momenta[b]);
-                        outFile << "InvMass_" << decayProducts[a] << "_" << decayProducts[b] << ": " << invMass << "\n";
+                    std::vector<double> invMasses;
+                    size_t n = momenta.size();
+
+                    for (size_t a = 0; a < (1 << n); a++) { 
+                        std::vector<Vec4> selectedMomenta;
+                        for (size_t b = 0; b < n; b++) {
+                            if (a & (1 << b)) {
+                                selectedMomenta.push_back(momenta[b]);
+                            }
+                        }
+                        if (selectedMomenta.size() >= 2) {
+                            double invMass = invariantMass(selectedMomenta);
+                            invMasses.push_back(invMass);
+                        }
                     }
+
+                    for (size_t m = 0; m < invMasses.size(); m++) {
+                        outFile << invMasses[m];
+                        if (m < invMasses.size() - 1) outFile << ";";
+                    }
+                    outFile << "\n";
                 }
             }
         }
     }
-
-    // Output decay channel statistics
-    outFile << "\nTotalHiggsDecays: " << totalHCount << "\n";
 
     outFile.close();
     return 0;
