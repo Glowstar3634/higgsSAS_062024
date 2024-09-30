@@ -3,17 +3,36 @@ import matplotlib.pyplot as plt
 import sys
 
 def plot_histogram(data, parameter, fixed_value):
+    # Ensure fixed_value is of the correct type
+    fixed_value = int(fixed_value)
+    
     # Filter the data based on the fixed parameter
     print(data.head())
     if parameter == "production_channel":
-        print("Fixed Production, plotting decays...")
+        print(f"Filtering for Production Channel {fixed_value}...")
         filtered_data = data[data['ProductionChannel'] == fixed_value]
+        
+        # Debug: Print the filtered data
+        print(f"Filtered data (first 5 rows):\n{filtered_data.head()}")
+        
+        if filtered_data.empty:
+            print("No matching data found for this production channel.")
+            return
+        
         ratios = filtered_data['DecayProducts'].value_counts(normalize=True)
         title = f'Decay Product Ratios for Production Channel {fixed_value}'
         xlabel = 'Decay Products'
     elif parameter == "decay_products":
-        print("Fixed Decays, plotting production...")
+        print(f"Filtering for Decay Products containing {fixed_value}...")
         filtered_data = data[data['DecayProducts'].str.contains(fixed_value)]
+        
+        # Debug: Print the filtered data
+        print(f"Filtered data (first 5 rows):\n{filtered_data.head()}")
+        
+        if filtered_data.empty:
+            print("No matching data found for these decay products.")
+            return
+        
         ratios = filtered_data['ProductionChannel'].value_counts(normalize=True)
         title = f'Production Channel Ratios for Decay Products {fixed_value}'
         xlabel = 'Production Channels'
