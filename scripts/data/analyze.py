@@ -8,7 +8,6 @@ def plot_histogram(data, parameter, fixed_value):
         fixed_value = int(fixed_value)
     
     # Filter the data based on the fixed parameter
-    print(data.head())
     if parameter == "production_channel":
         print(f"Filtering for Production Channel {fixed_value}...")
         filtered_data = data[data['ProductionChannel'] == fixed_value]
@@ -18,7 +17,7 @@ def plot_histogram(data, parameter, fixed_value):
             print("No matching data found for this production channel.")
             return
         
-        ratios = filtered_data['DecayProducts'].value_counts(normalize=True)
+        ratios = filtered_data['DecayProducts'].str.split(';').explode().value_counts(normalize=True)
         title = f'Decay Product Ratios for Production Channel {fixed_value}'
         xlabel = 'Decay Products'
     elif parameter == "decay_products":
@@ -51,6 +50,10 @@ def plot_histogram(data, parameter, fixed_value):
 def main(input_file, parameter, fixed_value):
     # Read the CSV file
     data = pd.read_csv(input_file)
+    
+    # Convert necessary columns to appropriate data types
+    data['ProductionChannel'] = data['ProductionChannel'].astype(int)
+    data['Jet_ID'] = data['Jet_ID'].apply(lambda x: [int(i) for i in x.split(';')] if pd.notna(x) else [])
     
     # Call the function to plot the histogram
     plot_histogram(data, parameter, fixed_value)
