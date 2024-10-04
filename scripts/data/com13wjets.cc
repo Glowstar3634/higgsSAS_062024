@@ -73,80 +73,61 @@ int main(int argc, char* argv[]) {
                 }
 
                 // Output the production channel, decay products, and their invariant masses
-                if (decayProducts.size() >= 2) {
-                    outFile << productionChannel << ",";
+                // Assuming you already have the decay products and their momenta
+if (decayProducts.size() >= 2) {
+    outFile << productionChannel << ",";
 
-                    for (size_t d = 0; d < decayProducts.size(); d++) {
-                        outFile << decayProducts[d];
-                        if (d < decayProducts.size() - 1) outFile << ";";
-                    }
-                    outFile << ",";
+    // Output decay products
+    for (size_t d = 0; d < decayProducts.size(); d++) {
+        outFile << decayProducts[d];
+        if (d < decayProducts.size() - 1) outFile << ";";
+    }
+    outFile << ",";
 
-                    std::vector<double> invMasses;
-                    size_t n = momenta.size();
+    std::vector<double> invMasses;
 
-                    for (size_t a = 0; a < (1 << n); a++) {
-                        std::vector<Vec4> selectedMomenta;
-                        for (size_t b = 0; b < n; b++) {
-                            if (a & (1 << b)) {
-                                selectedMomenta.push_back(momenta[b]);
-                            }
-                        }
-                        if (selectedMomenta.size() >= 2) {
-                            double invMass = invariantMass(selectedMomenta);
-                            invMasses.push_back(invMass);
-                        }
-                    }
+    // Jet clustering on final-state particles
+    std::vector<PseudoJet> particles;
+    for (int k = 0; k < pythia.event.size(); k++) {
+        if (pythia.event[k].isFinal()) {
+            PseudoJet particle(pythia.event[k].px(), pythia.event[k].py(), pythia.event[k].pz(), pythia.event[k].e());
+            particle.set_user_index(k);
+            particles.push_back(particle);
+        }
+    }
 
-                    for (size_t m = 0; m < invMasses.size(); m++) {
-                        outFile << invMasses[m];
-                        if (m < invMasses.size() - 1) outFile << ";";
-                    }
-                    outFile << ",";
+    if (!particles.empty()) {
+        ClusterSequence cs(particles, jet_def);
+        std::vector<PseudoJet> jets = sorted_by_pt(cs.inclusive_jets());
 
-                    // Jet clustering on final-state particles
-                    std::vector<PseudoJet> particles;
-                    for (int k = 0; k < pythia.event.size(); k++) {
-                        if (pythia.event[k].isFinal()) {
-                            PseudoJet particle(pythia.event[k].px(), pythia.event[k].py(), pythia.event[k].pz(), pythia.event[k].e());
-                            particle.set_user_index(k);
-                            particles.push_back(particle);
-                        }
-                    }
+        // Select the leading jet (or another criteria)
+        if (!jets.empty()) {
+            const PseudoJet& leadingJet = jets[0]; // For example, select the leading jet
+            outFile << leadingJet.pt() << "," << leadingJet.eta() << "," << leadingJet.phi() << "," << leadingJet.m() << ","; // Output jet data
 
-                    if (!particles.empty()) {
-                        ClusterSequence cs(particles, jet_def);
-                        std::vector<PseudoJet> jets = sorted_by_pt(cs.inclusive_jets());
+            // Optionally, associate particles with the leading jet
+            std::vector<PseudoJet> constituents = leadingJet.constituents();
+            std::map<int, int> particleToJetMap; // Map particle index to its Jet_ID
+            for (const auto& constituent : constituents) {
+                int index = constituent.user_index();
+                particleToJetMap[index] = 0; // Assuming jet_id is 0 for the leading jet
+            }
 
-                        int jet_id = 0;
-                        std::map<int, int> particleToJetMap; // Map particle index to its Jet_ID
-
-                        for (const auto& jet : jets) {
-                            
-                            outFile << jet.pt() << "," << jet.eta() << "," << jet.phi() << "," << jet.m() << ","; //Jet data
-
-                            // Associate particles in the jet with the Jet_ID
-                            std::vector<PseudoJet> constituents = jet.constituents();
-                            for (const auto& constituent : constituents) {
-                                int index = constituent.user_index();
-                                particleToJetMap[index] = jet_id;
-                            }
-                            jet_id++;
-                        }
-
-                        // Output particle-to-jet associations for each particle in the event
-                        for (int k = 0; k < pythia.event.size(); k++) {
-                            if (particleToJetMap.count(k)) {
-                                outFile << particleToJetMap[k];
-                            } else {
-                                outFile << "-1"; 
-                            }
-                            if (k < pythia.event.size() - 1) outFile << ";";
-                        }
-
-                        outFile << "\n"; 
-                    }
+            // Output particle-to-jet associations for this decay
+            for (int k = 0; k < pythia.event.size(); k++) {
+                if (particleToJetMap.count(k)) {
+                    outFile << particleToJetMap[k];
+                } else {
+                    outFile << "-1"; 
                 }
+                if (k < pythia.event.size() - 1) outFile << ";";
+            }
+
+            outFile << "\n"; 
+        }
+    }
+}
+
             }
         }
     }
