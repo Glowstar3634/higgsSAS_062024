@@ -50,15 +50,23 @@ def plot_histogram(data, parameter, fixed_value):
 def plot_jet_histograms(data, fixed_value):
     print("Plotting Jet Statistics...")
 
-    # Iterate over each Jet_ID in the data
+    # Extract unique Jet_IDs from the data
     unique_jet_ids = set([jet_id for sublist in data['Jet_ID'] for jet_id in sublist])
+    print(f"Unique Jet IDs found: {unique_jet_ids}")
     
+    if not unique_jet_ids:
+        print("No valid Jet_IDs found in the data.")
+        return
+
     for jet_id in unique_jet_ids:
         print(f"Analyzing data for Jet_ID {jet_id}...")
 
+        # Filter the data for this Jet_ID
         filtered_data = data[data['Jet_ID'].apply(lambda jet_list: jet_id in jet_list)]
+        print(f"Data found for Jet_ID {jet_id}: {len(filtered_data)} entries")
+
         if filtered_data.empty:
-            print(f"No data found for Jet_ID {jet_id}.")
+            print(f"No data found for Jet_ID {jet_id}. Skipping...")
             continue
 
         if fixed_value == 0:
@@ -78,6 +86,7 @@ def plot_jet_histograms(data, fixed_value):
 
         # Plot the histogram for each Jet_ID
         plt.figure(figsize=(10, 6))
+        print(f"Plotting histogram for Jet_ID {jet_id} with {len(ratios)} bins...")
         ratios.plot(kind='bar', color='lightcoral')
         plt.title(title)
         plt.xlabel(xlabel)
