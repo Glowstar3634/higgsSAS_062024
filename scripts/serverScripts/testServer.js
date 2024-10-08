@@ -5,7 +5,7 @@ const app = express();
 const port = 8080;
 
 app.get('/generate', (req, res) => {
-    const child = spawn('/home/ubuntu/pythia8312/scripts/t1pgen6.05', ['/home/ubuntu/pythia8312/scripts/particleData6_05.csv']);
+    const child = spawn('/home/ubuntu/pythia8312/scripts/t2pgen6.05', ['/home/ubuntu/pythia8312/scripts/particleData6_05.csv']);
 
     child.stdout.on('data', (data) => {
         console.log(`stdout: ${data}`);
