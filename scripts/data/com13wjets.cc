@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
     JetDefinition jet_def(antikt_algorithm, R);
 
     // Variables to keep track of event counts
-    int nEvents = 10000;
+    int nEvents = 10;
     int totalHCount = 0;
 
     // Write headers to the output file
@@ -80,7 +80,6 @@ int main(int argc, char* argv[]) {
                 if (decayProducts.size() >= 2) {
                     outFile << productionChannel << ",";
 
-                    // Output decay products
                     for (size_t d = 0; d < decayProducts.size(); d++) {
                         outFile << decayProducts[d];
                         if (d < decayProducts.size() - 1) outFile << ";";
@@ -122,7 +121,7 @@ int main(int argc, char* argv[]) {
                             if (particleToJetMap.count(k)) {
                                 outFile << particleToJetMap[k];
                             } else {
-                                outFile << "-1"; 
+                                outFile << "-1"; //no corresponding jet
                             }
                             if (k < pythia.event.size() - 1) outFile << ";";
                         }
