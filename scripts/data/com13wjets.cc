@@ -10,6 +10,7 @@
 using namespace Pythia8;
 using namespace fastjet;
 
+// Function to calculate invariant mass from a set of momenta
 double invariantMass(const std::vector<Vec4>& momenta) {
     Vec4 total;
     for (const auto& p : momenta) {
@@ -19,48 +20,51 @@ double invariantMass(const std::vector<Vec4>& momenta) {
 }
 
 int main(int argc, char* argv[]) {
+    // Check for correct number of arguments (output file name)
     if (argc != 2) {
         std::cerr << "Usage: " << argv[0] << " <output_file>" << std::endl;
         return 1;
     }
 
+    // Open the output file for writing
     std::ofstream outFile(argv[1]);
     if (!outFile.is_open()) {
         std::cerr << "Error: Could not open file for writing: " << argv[1] << std::endl;
         return 1;
     }
 
-    int nEvents = 10000;
+    // Initialize Pythia with proton-proton collisions at 100 TeV and enable Higgs processes
     Pythia pythia;
-
-    //Pythia initialization
     pythia.readString("Random:setSeed = on");
     pythia.readString("Random:seed = 0");
     pythia.readString("Beams:idA = 2212");
     pythia.readString("Beams:idB = 2212");
-    pythia.readString("Beams:eCM = 100.e3");
-    pythia.readString("HiggsSM:all  = on");
-    pythia.readString("25:onMode = on");
+    pythia.readString("Beams:eCM = 100.e3"); // Center of mass energy: 100 TeV
+    pythia.readString("HiggsSM:all  = on");  // Turn on all Higgs processes
+    pythia.readString("25:onMode = on");     // Allow all Higgs decay modes
     pythia.init();
 
-    // Jet definition (anti-kt, R=0.4)
+    // Anti-kt jet clustering with R = 0.4
     double R = 0.4;
     JetDefinition jet_def(antikt_algorithm, R);
 
-    int totalHCount = 0; //total
+    // Variables to keep track of event counts
+    int nEvents = 10;
+    int totalHCount = 0;
 
-    //Headers
+    // Write headers to the output file
     outFile << "ProductionChannel,DecayProducts,InvMasses,Jet_PT,Jet_Eta,Jet_Phi,Jet_Mass,Jet_ID\n";
 
+    // Event loop
     for (int i = 0; i < nEvents; i++) {
         if (!pythia.next()) continue;
 
-        //Decays of detected Higgs particles only
+        // Loop over all particles to detect Higgs decays
         for (int j = 0; j < pythia.event.size(); j++) {
-            std::vector<int> validStatuses = {-62};
-            if (pythia.event[j].id() == 25 && (std::find(validStatuses.begin(), validStatuses.end(), pythia.event[j].status()) != validStatuses.end())) {
+            if (pythia.event[j].id() == 25 && pythia.event[j].status() == -62) {  // Higgs status -62 indicates it has decayed
                 totalHCount++;
 
+                // Store decay products and their momenta
                 std::vector<int> decayProducts;
                 std::vector<Vec4> momenta;
                 int productionChannel = pythia.info.code();
@@ -72,66 +76,67 @@ int main(int argc, char* argv[]) {
                     }
                 }
 
-                // Output the production channel, decay products, and their invariant masses
-                // Assuming you already have the decay products and their momenta
-if (decayProducts.size() >= 2) {
-    outFile << productionChannel << ",";
+                // Output the production channel and decay products
+                if (decayProducts.size() >= 2) {
+                    outFile << productionChannel << ",";
 
-    // Output decay products
-    for (size_t d = 0; d < decayProducts.size(); d++) {
-        outFile << decayProducts[d];
-        if (d < decayProducts.size() - 1) outFile << ";";
-    }
-    outFile << ",";
+                    // Output decay products
+                    for (size_t d = 0; d < decayProducts.size(); d++) {
+                        outFile << decayProducts[d];
+                        if (d < decayProducts.size() - 1) outFile << ";";
+                    }
+                    outFile << ",";
 
-    std::vector<double> invMasses;
+                    // Calculate and output invariant mass of the decay products
+                    double invMass = invariantMass(momenta);
+                    outFile << invMass << ",";
 
-    // Jet clustering on final-state particles
-    std::vector<PseudoJet> particles;
-    for (int k = 0; k < pythia.event.size(); k++) {
-        if (pythia.event[k].isFinal()) {
-            PseudoJet particle(pythia.event[k].px(), pythia.event[k].py(), pythia.event[k].pz(), pythia.event[k].e());
-            particle.set_user_index(k);
-            particles.push_back(particle);
-        }
-    }
+                    // Perform jet clustering on final-state particles
+                    std::vector<PseudoJet> particles;
+                    for (int k = 0; k < pythia.event.size(); k++) {
+                        if (pythia.event[k].isFinal()) {
+                            PseudoJet particle(pythia.event[k].px(), pythia.event[k].py(), pythia.event[k].pz(), pythia.event[k].e());
+                            particle.set_user_index(k);
+                            particles.push_back(particle);
+                        }
+                    }
 
-    if (!particles.empty()) {
-        ClusterSequence cs(particles, jet_def);
-        std::vector<PseudoJet> jets = sorted_by_pt(cs.inclusive_jets());
+                    // Cluster particles into jets
+                    if (!particles.empty()) {
+                        ClusterSequence cs(particles, jet_def);
+                        std::vector<PseudoJet> jets = sorted_by_pt(cs.inclusive_jets());
 
-        // Select the leading jet (or another criteria)
-        if (!jets.empty()) {
-            const PseudoJet& leadingJet = jets[0]; // For example, select the leading jet
-            outFile << leadingJet.pt() << "," << leadingJet.eta() << "," << leadingJet.phi() << "," << leadingJet.m() << ","; // Output jet data
+                        // Select the leading jet and output its properties
+                        if (!jets.empty()) {
+                            const PseudoJet& leadingJet = jets[0];
+                            outFile << leadingJet.pt() << "," << leadingJet.eta() << "," << leadingJet.phi() << "," << leadingJet.m() << ",";
 
-            // Optionally, associate particles with the leading jet
-            std::vector<PseudoJet> constituents = leadingJet.constituents();
-            std::map<int, int> particleToJetMap; // Map particle index to its Jet_ID
-            for (const auto& constituent : constituents) {
-                int index = constituent.user_index();
-                particleToJetMap[index] = 0; // Assuming jet_id is 0 for the leading jet
-            }
+                            // Associate particles with the leading jet
+                            std::vector<PseudoJet> constituents = leadingJet.constituents();
+                            std::map<int, int> particleToJetMap;
+                            for (const auto& constituent : constituents) {
+                                int index = constituent.user_index();
+                                particleToJetMap[index] = 0;  // Jet ID = 0 for the leading jet
+                            }
 
-            // Output particle-to-jet associations for this decay
-            for (int k = 0; k < pythia.event.size(); k++) {
-                if (particleToJetMap.count(k)) {
-                    outFile << particleToJetMap[k];
-                } else {
-                    outFile << "-1"; 
+                            // Output particle-to-jet associations for this decay
+                            for (int k = 0; k < pythia.event.size(); k++) {
+                                if (particleToJetMap.count(k)) {
+                                    outFile << particleToJetMap[k];
+                                } else {
+                                    outFile << "-1";  // Not associated with any jet
+                                }
+                                if (k < pythia.event.size() - 1) outFile << ";";
+                            }
+                            outFile << "\n";  // End of current event data
+                        }
+                    }
                 }
-                if (k < pythia.event.size() - 1) outFile << ";";
-            }
-
-            outFile << "\n"; 
-        }
-    }
-}
-
             }
         }
     }
 
+    // Close the output file
     outFile.close();
     return 0;
 }
