@@ -39,9 +39,9 @@ int main(int argc, char* argv[]) {
     pythia.readString("Random:seed = 0");
     pythia.readString("Beams:idA = 2212");
     pythia.readString("Beams:idB = 2212");
-    pythia.readString("Beams:eCM = 100.e3"); // Center of mass energy: 100 TeV
-    pythia.readString("HiggsSM:all  = on");  // Turn on all Higgs processes
-    pythia.readString("25:onMode = on");     // Allow all Higgs decay modes
+    pythia.readString("Beams:eCM = 100.e3");
+    pythia.readString("HiggsSM:all  = on");
+    pythia.readString("25:onMode = on");
     pythia.init();
 
     // Anti-kt jet clustering with R = 0.4
@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
     JetDefinition jet_def(antikt_algorithm, R);
 
     // Variables to keep track of event counts
-    int nEvents = 10;
+    int nEvents = 10000;
     int totalHCount = 0;
 
     // Write headers to the output file
@@ -106,31 +106,30 @@ int main(int argc, char* argv[]) {
                         ClusterSequence cs(particles, jet_def);
                         std::vector<PseudoJet> jets = sorted_by_pt(cs.inclusive_jets());
 
-                        // Select the leading jet and output its properties
-                        if (!jets.empty()) {
-                            const PseudoJet& leadingJet = jets[0];
-                            outFile << leadingJet.pt() << "," << leadingJet.eta() << "," << leadingJet.phi() << "," << leadingJet.m() << ",";
+                        for (size_t j = 0; j < jets.size(); ++j) {
+                            const PseudoJet& jet = jets[j];
+                            outFile << jet.pt() << "," << jet.eta() << "," << jet.phi() << "," << jet.m() << ","; 
 
-                            // Associate particles with the leading jet
-                            std::vector<PseudoJet> constituents = leadingJet.constituents();
-                            std::map<int, int> particleToJetMap;
+                            std::vector<PseudoJet> constituents = jet.constituents();
+                            int jet_id = j; 
                             for (const auto& constituent : constituents) {
                                 int index = constituent.user_index();
-                                particleToJetMap[index] = 0;  // Jet ID = 0 for the leading jet
+                                particleToJetMap[index] = jet_id;
                             }
-
-                            // Output particle-to-jet associations for this decay
-                            for (int k = 0; k < pythia.event.size(); k++) {
-                                if (particleToJetMap.count(k)) {
-                                    outFile << particleToJetMap[k];
-                                } else {
-                                    outFile << "-1";  // Not associated with any jet
-                                }
-                                if (k < pythia.event.size() - 1) outFile << ";";
-                            }
-                            outFile << "\n";  // End of current event data
                         }
+
+                        for (int k = 0; k < pythia.event.size(); k++) {
+                            if (particleToJetMap.count(k)) {
+                                outFile << particleToJetMap[k];
+                            } else {
+                                outFile << "-1"; 
+                            }
+                            if (k < pythia.event.size() - 1) outFile << ";";
+                        }
+
+                        outFile << "\n"; 
                     }
+
                 }
             }
         }
