@@ -105,31 +105,62 @@ int main(int argc, char* argv[]) {
                         ClusterSequence cs(particles, jet_def);
                         std::vector<PseudoJet> jets = sorted_by_pt(cs.inclusive_jets());
 
-                        // Select the leading jet (or another criteria)
                         if (!jets.empty()) {
-                            const PseudoJet& leadingJet = jets[0]; // For example, select the leading jet
-                            outFile << leadingJet.pt() << "," << leadingJet.eta() << "," << leadingJet.phi() << "," << leadingJet.m() << ","; // Output jet data
-
-                            // Optionally, associate decay products with the leading jet
-                            std::vector<PseudoJet> constituents = leadingJet.constituents();
                             std::map<int, int> particleToJetMap; // Map particle index to its Jet_ID
-                            for (const auto& constituent : constituents) {
-                                int index = constituent.user_index();
-                                particleToJetMap[index] = 0; // Assuming jet_id is 0 for the leading jet
+
+                            // Loop over all jets and map particles to their corresponding jets
+                            for (size_t jetID = 0; jetID < jets.size(); ++jetID) {
+                                const PseudoJet& jet = jets[jetID];
+                                std::vector<PseudoJet> constituents = jet.constituents();
+
+                                // Associate particles with their jet ID
+                                for (const auto& constituent : constituents) {
+                                    int index = constituent.user_index();
+                                    particleToJetMap[index] = jetID; // Map particle index to this jet's ID
+                                }
                             }
 
-                            // Output particle-to-jet associations only for decay products
+                            // Variables to accumulate information about the jets containing decay products
+                            std::vector<int> associatedJetIDs;
+                            std::vector<double> associatedJetPts, associatedJetEtas, associatedJetPhis, associatedJetMasses;
+
+                            // Check each decay product for jet association
                             for (const auto& decayIndex : decayProductIndices) {
                                 if (particleToJetMap.count(decayIndex)) {
-                                    outFile << particleToJetMap[decayIndex];
+                                    int jetID = particleToJetMap[decayIndex];
+                                    associatedJetIDs.push_back(jetID);
+
+                                    // Get the jet data for the associated jet
+                                    const PseudoJet& associatedJet = jets[jetID];
+                                    associatedJetPts.push_back(associatedJet.pt());
+                                    associatedJetEtas.push_back(associatedJet.eta());
+                                    associatedJetPhis.push_back(associatedJet.phi());
+                                    associatedJetMasses.push_back(associatedJet.m());
                                 } else {
-                                    outFile << "-1"; 
+                                    associatedJetIDs.push_back(-1); // No jet association for this decay product
                                 }
-                                if (&decayIndex != &decayProductIndices.back()) outFile << ";";
                             }
 
-                            outFile << "\n"; 
+                            // Output jet data if we found associated jets for decay products
+                            if (!associatedJetIDs.empty()) {
+                                for (size_t i = 0; i < associatedJetIDs.size(); ++i) {
+                                    if (associatedJetIDs[i] != -1) {
+                                        outFile << associatedJetPts[i] << "," << associatedJetEtas[i] << "," << associatedJetPhis[i] << "," << associatedJetMasses[i] << ",";
+                                    } else {
+                                        outFile << "-1,-1,-1,-1,";
+                                    }
+                                }
+
+                                // Output Jet IDs associated with decay products
+                                for (size_t i = 0; i < associatedJetIDs.size(); ++i) {
+                                    outFile << associatedJetIDs[i];
+                                    if (i < associatedJetIDs.size() - 1) outFile << ";";
+                                }
+
+                                outFile << "\n";
+                            }
                         }
+
                     }
                 }
             }
