@@ -64,25 +64,25 @@ int main(int argc, char* argv[]) {
             if (pythia.event[j].id() == 25 && pythia.event[j].status() == -62) {  // Higgs status -62 indicates it has decayed
                 totalHCount++;
 
-                // Store decay products and their momenta
-                std::vector<int> decayProducts;
+                // Store decay product indices and their momenta
+                std::vector<int> decayProductIndices;
                 std::vector<Vec4> momenta;
                 int productionChannel = pythia.info.code();
 
                 for (int k = 0; k < pythia.event.size(); k++) {
                     if (pythia.event[k].mother1() == j || pythia.event[k].mother2() == j) {
-                        decayProducts.push_back(pythia.event[k].id());
+                        decayProductIndices.push_back(k);  // Store the index (not the ID)
                         momenta.push_back(pythia.event[k].p());
                     }
                 }
 
                 // Output the production channel and decay products
-                if (decayProducts.size() >= 2) {
+                if (decayProductIndices.size() >= 2) {
                     outFile << productionChannel << ",";
 
-                    for (size_t d = 0; d < decayProducts.size(); d++) {
-                        outFile << decayProducts[d];
-                        if (d < decayProducts.size() - 1) outFile << ";";
+                    for (size_t d = 0; d < decayProductIndices.size(); d++) {
+                        outFile << pythia.event[decayProductIndices[d]].id();
+                        if (d < decayProductIndices.size() - 1) outFile << ";";
                     }
                     outFile << ",";
 
@@ -119,14 +119,13 @@ int main(int argc, char* argv[]) {
                             }
 
                             // Output particle-to-jet associations only for decay products
-                            for (const auto& decayIndex : decayProducts) {
-                                int finalStateIndex = pythia.event[decayIndex].index();
-                                if (particleToJetMap.count(finalStateIndex)) {
-                                    outFile << particleToJetMap[finalStateIndex];
+                            for (const auto& decayIndex : decayProductIndices) {
+                                if (particleToJetMap.count(decayIndex)) {
+                                    outFile << particleToJetMap[decayIndex];
                                 } else {
                                     outFile << "-1"; 
                                 }
-                                outFile << ";";  // Separate decay products with a semicolon
+                                if (&decayIndex != &decayProductIndices.back()) outFile << ";";
                             }
 
                             outFile << "\n"; 
