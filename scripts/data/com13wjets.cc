@@ -101,7 +101,6 @@ int main(int argc, char* argv[]) {
                     }
 
                     // Cluster particles into jets
-                    // Inside your main event loop, after clustering jets
                     if (!particles.empty()) {
                         ClusterSequence cs(particles, jet_def);
                         std::vector<PseudoJet> jets = sorted_by_pt(cs.inclusive_jets());
@@ -111,7 +110,7 @@ int main(int argc, char* argv[]) {
                             const PseudoJet& leadingJet = jets[0]; // For example, select the leading jet
                             outFile << leadingJet.pt() << "," << leadingJet.eta() << "," << leadingJet.phi() << "," << leadingJet.m() << ","; // Output jet data
 
-                            // Optionally, associate particles with the leading jet
+                            // Optionally, associate decay products with the leading jet
                             std::vector<PseudoJet> constituents = leadingJet.constituents();
                             std::map<int, int> particleToJetMap; // Map particle index to its Jet_ID
                             for (const auto& constituent : constituents) {
@@ -119,14 +118,15 @@ int main(int argc, char* argv[]) {
                                 particleToJetMap[index] = 0; // Assuming jet_id is 0 for the leading jet
                             }
 
-                            // Output particle-to-jet associations for this decay
-                            for (int k = 0; k < pythia.event.size(); k++) {
-                                if (particleToJetMap.count(k)) {
-                                    outFile << particleToJetMap[k];
+                            // Output particle-to-jet associations only for decay products
+                            for (const auto& decayIndex : decayProducts) {
+                                int finalStateIndex = pythia.event[decayIndex].index();
+                                if (particleToJetMap.count(finalStateIndex)) {
+                                    outFile << particleToJetMap[finalStateIndex];
                                 } else {
                                     outFile << "-1"; 
                                 }
-                                if (k < pythia.event.size() - 1) outFile << ";";
+                                outFile << ";";  // Separate decay products with a semicolon
                             }
 
                             outFile << "\n"; 
