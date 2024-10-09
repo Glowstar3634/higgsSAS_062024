@@ -19,6 +19,22 @@ double invariantMass(const std::vector<Vec4>& momenta) {
     return total.mCalc();
 }
 
+// Recursive function to trace a particle to its final state descendants
+void traceToFinalState(const Event& event, int index, std::vector<int>& finalStateParticles) {
+    // Check if the particle is final state
+    if (event[index].isFinal()) {
+        finalStateParticles.push_back(index);
+        return;
+    }
+
+    // Recursively follow daughters if they exist
+    for (int d = event[index].daughter1(); d <= event[index].daughter2(); ++d) {
+        if (d > 0 && d < event.size()) {
+            traceToFinalState(event, d, finalStateParticles);
+        }
+    }
+}
+
 int main(int argc, char* argv[]) {
     // Check for correct number of arguments (output file name)
     if (argc != 2) {
@@ -64,25 +80,25 @@ int main(int argc, char* argv[]) {
             if (pythia.event[j].id() == 25 && pythia.event[j].status() == -62) {  // Higgs status -62 indicates it has decayed
                 totalHCount++;
 
-                // Store decay product indices and their momenta
-                std::vector<int> decayProductIndices;
+                // Store decay products and their momenta
+                std::vector<int> decayProducts;
                 std::vector<Vec4> momenta;
                 int productionChannel = pythia.info.code();
 
                 for (int k = 0; k < pythia.event.size(); k++) {
                     if (pythia.event[k].mother1() == j || pythia.event[k].mother2() == j) {
-                        decayProductIndices.push_back(k);  // Store the index (not the ID)
+                        decayProducts.push_back(pythia.event[k].id());
                         momenta.push_back(pythia.event[k].p());
                     }
                 }
 
                 // Output the production channel and decay products
-                if (decayProductIndices.size() >= 2) {
+                if (decayProducts.size() >= 2) {
                     outFile << productionChannel << ",";
 
-                    for (size_t d = 0; d < decayProductIndices.size(); d++) {
-                        outFile << pythia.event[decayProductIndices[d]].id();
-                        if (d < decayProductIndices.size() - 1) outFile << ";";
+                    for (size_t d = 0; d < decayProducts.size(); d++) {
+                        outFile << decayProducts[d];
+                        if (d < decayProducts.size() - 1) outFile << ";";
                     }
                     outFile << ",";
 
@@ -105,62 +121,64 @@ int main(int argc, char* argv[]) {
                         ClusterSequence cs(particles, jet_def);
                         std::vector<PseudoJet> jets = sorted_by_pt(cs.inclusive_jets());
 
-                        if (!jets.empty()) {
-                            std::map<int, int> particleToJetMap; // Map particle index to its Jet_ID
+                        // Map final state particles to their respective jets
+                        std::map<int, int> particleToJetMap; // Map particle index to Jet_ID
 
-                            // Loop over all jets and map particles to their corresponding jets
-                            for (size_t jetID = 0; jetID < jets.size(); ++jetID) {
-                                const PseudoJet& jet = jets[jetID];
-                                std::vector<PseudoJet> constituents = jet.constituents();
-
-                                // Associate particles with their jet ID
-                                for (const auto& constituent : constituents) {
-                                    int index = constituent.user_index();
-                                    particleToJetMap[index] = jetID; // Map particle index to this jet's ID
-                                }
-                            }
-
-                            // Variables to accumulate information about the jets containing decay products
-                            std::vector<int> associatedJetIDs;
-                            std::vector<double> associatedJetPts, associatedJetEtas, associatedJetPhis, associatedJetMasses;
-
-                            // Check each decay product for jet association
-                            for (const auto& decayIndex : decayProductIndices) {
-                                if (particleToJetMap.count(decayIndex)) {
-                                    int jetID = particleToJetMap[decayIndex];
-                                    associatedJetIDs.push_back(jetID);
-
-                                    // Get the jet data for the associated jet
-                                    const PseudoJet& associatedJet = jets[jetID];
-                                    associatedJetPts.push_back(associatedJet.pt());
-                                    associatedJetEtas.push_back(associatedJet.eta());
-                                    associatedJetPhis.push_back(associatedJet.phi());
-                                    associatedJetMasses.push_back(associatedJet.m());
-                                } else {
-                                    associatedJetIDs.push_back(-1); // No jet association for this decay product
-                                }
-                            }
-
-                            // Output jet data if we found associated jets for decay products
-                            if (!associatedJetIDs.empty()) {
-                                for (size_t i = 0; i < associatedJetIDs.size(); ++i) {
-                                    if (associatedJetIDs[i] != -1) {
-                                        outFile << associatedJetPts[i] << "," << associatedJetEtas[i] << "," << associatedJetPhis[i] << "," << associatedJetMasses[i] << ",";
-                                    } else {
-                                        outFile << "-1,-1,-1,-1,";
-                                    }
-                                }
-
-                                // Output Jet IDs associated with decay products
-                                for (size_t i = 0; i < associatedJetIDs.size(); ++i) {
-                                    outFile << associatedJetIDs[i];
-                                    if (i < associatedJetIDs.size() - 1) outFile << ";";
-                                }
-
-                                outFile << "\n";
+                        for (size_t jetId = 0; jetId < jets.size(); ++jetId) {
+                            std::vector<PseudoJet> constituents = jets[jetId].constituents();
+                            for (const auto& constituent : constituents) {
+                                particleToJetMap[constituent.user_index()] = jetId;
                             }
                         }
 
+                        // For each decay product, trace its final state descendants and check if they belong to a jet
+                        std::set<int> jetIDsWithDecayProducts;
+                        for (int decayIndex : decayProducts) {
+                            std::vector<int> finalStateParticles;
+                            traceToFinalState(pythia.event, decayIndex, finalStateParticles);
+
+                            // Check if any final state particle is in a jet
+                            for (int finalStateIndex : finalStateParticles) {
+                                if (particleToJetMap.count(finalStateIndex)) {
+                                    jetIDsWithDecayProducts.insert(particleToJetMap[finalStateIndex]);
+                                }
+                            }
+                        }
+
+                        //Output jet data for each  decay product's daughter particles
+                        for (const std::string& property : {"pt", "eta", "phi", "m"}) {
+                            for (int decayIndex : decayProducts) {
+                                if (particleToJetMap.count(decayIndex)) {
+                                    PseudoJet jet = jets[particleToJetMap[decayIndex]];
+                                    if (property == "pt") {
+                                        outFile << jet.pt();
+                                    } else if (property == "eta") {
+                                        outFile << jet.eta();
+                                    } else if (property == "phi") {
+                                        outFile << jet.phi();
+                                    } else if (property == "m") {
+                                        outFile << jet.m();
+                                    }
+                                } else {
+                                    outFile << "-1";
+                                }
+
+                                if (decayIndex != decayProducts.back()) outFile << ";";
+                            }
+                            outFile << ",";  // Move to the next column for the next property
+                        }
+
+                        // Output Jet ID for each decay product
+                        for (int decayIndex : decayProducts) {
+                            if (particleToJetMap.count(decayIndex)) {
+                                outFile << particleToJetMap[decayIndex];
+                            } else {
+                                outFile << "-1";
+                            }
+
+                            if (decayIndex != decayProducts.back()) outFile << ";";
+                        }
+                        outFile << "\n";
                     }
                 }
             }
