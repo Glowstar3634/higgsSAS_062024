@@ -101,34 +101,37 @@ int main(int argc, char* argv[]) {
                     }
 
                     // Cluster particles into jets
+                    // Inside your main event loop, after clustering jets
                     if (!particles.empty()) {
                         ClusterSequence cs(particles, jet_def);
                         std::vector<PseudoJet> jets = sorted_by_pt(cs.inclusive_jets());
 
-                        for (size_t j = 0; j < jets.size(); ++j) {
-                            const PseudoJet& jet = jets[j];
-                            outFile << jet.pt() << "," << jet.eta() << "," << jet.phi() << "," << jet.m() << ","; 
+                        // Select the leading jet (or another criteria)
+                        if (!jets.empty()) {
+                            const PseudoJet& leadingJet = jets[0]; // For example, select the leading jet
+                            outFile << leadingJet.pt() << "," << leadingJet.eta() << "," << leadingJet.phi() << "," << leadingJet.m() << ","; // Output jet data
 
-                            std::vector<PseudoJet> constituents = jet.constituents();
-                            int jet_id = j; 
+                            // Optionally, associate particles with the leading jet
+                            std::vector<PseudoJet> constituents = leadingJet.constituents();
+                            std::map<int, int> particleToJetMap; // Map particle index to its Jet_ID
                             for (const auto& constituent : constituents) {
                                 int index = constituent.user_index();
-                                particleToJetMap[index] = jet_id;
+                                particleToJetMap[index] = 0; // Assuming jet_id is 0 for the leading jet
                             }
-                        }
 
-                        for (int k = 0; k < pythia.event.size(); k++) {
-                            if (particleToJetMap.count(k)) {
-                                outFile << particleToJetMap[k];
-                            } else {
-                                outFile << "-1"; //no corresponding jet
+                            // Output particle-to-jet associations for this decay
+                            for (int k = 0; k < pythia.event.size(); k++) {
+                                if (particleToJetMap.count(k)) {
+                                    outFile << particleToJetMap[k];
+                                } else {
+                                    outFile << "-1"; 
+                                }
+                                if (k < pythia.event.size() - 1) outFile << ";";
                             }
-                            if (k < pythia.event.size() - 1) outFile << ";";
-                        }
 
-                        outFile << "\n"; 
+                            outFile << "\n"; 
+                        }
                     }
-
                 }
             }
         }
