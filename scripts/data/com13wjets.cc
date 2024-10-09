@@ -120,8 +120,6 @@ int main(int argc, char* argv[]) {
                     if (!particles.empty()) {
                         ClusterSequence cs(particles, jet_def);
                         std::vector<PseudoJet> jets = sorted_by_pt(cs.inclusive_jets());
-
-                        // Map final state particles to their respective jets
                         std::map<int, int> particleToJetMap; // Map particle index to Jet_ID
 
                         for (size_t jetId = 0; jetId < jets.size(); ++jetId) {
@@ -149,24 +147,30 @@ int main(int argc, char* argv[]) {
                         for (const std::string& property : {"pt", "eta", "phi", "m"}) {
                             for (int decayIndex : decayProducts) {
                                 if (particleToJetMap.count(decayIndex)) {
-                                    PseudoJet jet = jets[particleToJetMap[decayIndex]];
-                                    if (property == "pt") {
-                                        outFile << jet.pt();
-                                    } else if (property == "eta") {
-                                        outFile << jet.eta();
-                                    } else if (property == "phi") {
-                                        outFile << jet.phi();
-                                    } else if (property == "m") {
-                                        outFile << jet.m();
+                                    int jetId = particleToJetMap[decayIndex];
+                                    if (jetId < jets.size()) {  // Check if jetId is within the valid range
+                                        PseudoJet jet = jets[jetId];
+                                        if (property == "pt") {
+                                            outFile << jet.pt();
+                                        } else if (property == "eta") {
+                                            outFile << jet.eta();
+                                        } else if (property == "phi") {
+                                            outFile << jet.phi();
+                                        } else if (property == "m") {
+                                            outFile << jet.m();
+                                        }
+                                    } else {
+                                        outFile << "-1";  // If jetId is out of range
                                     }
                                 } else {
-                                    outFile << "-1";
+                                    outFile << "-1";  // If decayIndex doesn't map to a jet
                                 }
 
                                 if (decayIndex != decayProducts.back()) outFile << ";";
                             }
                             outFile << ",";  // Move to the next column for the next property
                         }
+
 
                         // Output Jet ID for each decay product
                         for (int decayIndex : decayProducts) {
