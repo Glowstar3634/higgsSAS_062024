@@ -130,8 +130,6 @@ int main(int argc, char* argv[]) {
                             std::vector<int> finalStateParticles;
                             traceToFinalState(pythia.event, indexInEvent, finalStateParticles);
 
-                            std::cout << "Checkpoint: Family traced for decay product " << decayIndex << std::endl;
-
                             // Check if any final state particle is in a jet
                             for (int finalStateIndex : finalStateParticles) {
                                 if (particleToJetMap.count(finalStateIndex)) {
