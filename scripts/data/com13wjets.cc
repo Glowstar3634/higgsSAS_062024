@@ -4,7 +4,6 @@
 #include <vector>
 #include <algorithm>
 #include <map>
-#include <set>
 #include "Pythia8/Pythia.h"
 #include "fastjet/ClusterSequence.hh"
 
@@ -37,6 +36,8 @@ void traceToFinalState(const Event& event, int index, std::vector<int>& finalSta
 }
 
 int main(int argc, char* argv[]) {
+    std::cout << "Checkpoint: Starting program." << std::endl;
+
     // Check for correct number of arguments (output file name)
     if (argc != 2) {
         std::cerr << "Usage: " << argv[0] << " <output_file>" << std::endl;
@@ -50,6 +51,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    std::cout << "Checkpoint: Output file opened successfully." << std::endl;
+
     // Initialize Pythia with proton-proton collisions at 100 TeV and enable Higgs processes
     Pythia pythia;
     pythia.readString("Random:setSeed = on");
@@ -60,6 +63,8 @@ int main(int argc, char* argv[]) {
     pythia.readString("HiggsSM:all  = on");
     pythia.readString("25:onMode = on");
     pythia.init();
+
+    std::cout << "Checkpoint: Pythia initialized." << std::endl;
 
     // Anti-kt jet clustering with R = 0.4
     double R = 0.4;
@@ -74,12 +79,14 @@ int main(int argc, char* argv[]) {
 
     // Event loop
     for (int i = 0; i < nEvents; i++) {
+        std::cout << "Checkpoint: Starting event " << i << std::endl;
         if (!pythia.next()) continue;
 
         // Loop over all particles to detect Higgs decays
         for (int j = 0; j < pythia.event.size(); j++) {
             if (pythia.event[j].id() == 25 && pythia.event[j].status() == -62) {  // Higgs status -62 indicates it has decayed
                 totalHCount++;
+                std::cout << "Checkpoint: Higgs found in event " << i << ", index " << j << std::endl;
 
                 // Store decay products and their momenta
                 std::vector<int> decayProducts;
@@ -92,6 +99,8 @@ int main(int argc, char* argv[]) {
                         momenta.push_back(pythia.event[k].p());
                     }
                 }
+
+                std::cout << "Checkpoint: Decay products and momenta collected." << std::endl;
 
                 // Output the production channel and decay products
                 if (decayProducts.size() >= 2) {
@@ -107,6 +116,8 @@ int main(int argc, char* argv[]) {
                     double invMass = invariantMass(momenta);
                     outFile << invMass << ",";
 
+                    std::cout << "Checkpoint: Invariant mass calculated." << std::endl;
+
                     // Perform jet clustering on final-state particles
                     std::vector<PseudoJet> particles;
                     for (int k = 0; k < pythia.event.size(); k++) {
@@ -116,6 +127,8 @@ int main(int argc, char* argv[]) {
                             particles.push_back(particle);
                         }
                     }
+
+                    std::cout << "Checkpoint: Final state particles prepared for jet clustering." << std::endl;
 
                     // Cluster particles into jets
                     if (!particles.empty()) {
@@ -130,16 +143,21 @@ int main(int argc, char* argv[]) {
                             }
                         }
 
+                        std::cout << "Checkpoint: Jet clustering completed." << std::endl;
+
                         // For each decay product, trace its final state descendants and check if they belong to a jet
                         std::set<int> jetIDsWithDecayProducts;
                         for (int decayIndex : decayProducts) {
                             std::vector<int> finalStateParticles;
                             traceToFinalState(pythia.event, decayIndex, finalStateParticles);
 
+                            std::cout << "Checkpoint: Family traced for decay product " << decayIndex << std::endl;
+
                             // Check if any final state particle is in a jet
                             for (int finalStateIndex : finalStateParticles) {
                                 if (particleToJetMap.count(finalStateIndex)) {
                                     jetIDsWithDecayProducts.insert(particleToJetMap[finalStateIndex]);
+                                    particleToJetMap[decayIndex] = particleToJetMap[finalStateIndex];
                                 }
                             }
                         }
@@ -147,20 +165,24 @@ int main(int argc, char* argv[]) {
                         // Output jet data for each decay product's daughter particles
                         for (const std::string& property : {"pt", "eta", "phi", "m"}) {
                             for (int decayIndex : decayProducts) {
-                                if (particleToJetMap.count(decayIndex) && particleToJetMap[decayIndex] < jets.size()) {
+                                if (particleToJetMap.count(decayIndex)) {
                                     int jetId = particleToJetMap[decayIndex];
-                                    PseudoJet jet = jets[jetId];
-                                    if (property == "pt") {
-                                        outFile << jet.pt();
-                                    } else if (property == "eta") {
-                                        outFile << jet.eta();
-                                    } else if (property == "phi") {
-                                        outFile << jet.phi();
-                                    } else if (property == "m") {
-                                        outFile << jet.m();
+                                    if (jetId < jets.size()) {  // Check if jetId is within the valid range
+                                        PseudoJet jet = jets[jetId];
+                                        if (property == "pt") {
+                                            outFile << jet.pt();
+                                        } else if (property == "eta") {
+                                            outFile << jet.eta();
+                                        } else if (property == "phi") {
+                                            outFile << jet.phi();
+                                        } else if (property == "m") {
+                                            outFile << jet.m();
+                                        }
+                                    } else {
+                                        outFile << "-1";  // If jetId is out of range
                                     }
                                 } else {
-                                    outFile << "-1";  // If decayIndex doesn't map to a valid jet
+                                    outFile << "-1";  // If decayIndex doesn't map to a jet
                                 }
 
                                 if (decayIndex != decayProducts.back()) outFile << ";";
@@ -187,5 +209,6 @@ int main(int argc, char* argv[]) {
 
     // Close the output file
     outFile.close();
+    std::cout << "Checkpoint: Output file closed, program completed." << std::endl;
     return 0;
 }
