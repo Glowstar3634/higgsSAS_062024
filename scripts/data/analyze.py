@@ -10,28 +10,30 @@ def analyze_data(file_path, parameter, fixed_value=None):
 
     if parameter == 'production_channel':
         # Analyze by production channel
-        production_channel_counts = data['ProductionChannel'].value_counts()
-        print("Production Channel Counts:")
+        production_channel_counts = data['ProductionChannel'].value_counts(normalize=True)  # Normalize to get ratios
+        print("Production Channel Ratios:")
         print(production_channel_counts)
 
-        # Plot histogram of production channels
-        plt.hist(data['ProductionChannel'], bins=np.arange(data['ProductionChannel'].min(), data['ProductionChannel'].max() + 1))
+        # Plot histogram of production channels with ratios
+        plt.bar(production_channel_counts.index, production_channel_counts.values)
         plt.xlabel('Production Channel')
-        plt.ylabel('Count')
-        plt.title('Production Channel Histogram')
+        plt.ylabel('Ratio')
+        plt.title('Production Channel Ratio Histogram')
+        plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
         plt.show()
 
     elif parameter == 'decay_products':
         # Analyze by decay products
-        decay_products = data['DecayProducts'].str.split(';', expand=True).stack().value_counts()
-        print("Decay Product Counts:")
+        decay_products = data['DecayProducts'].str.split(';', expand=True).stack().value_counts(normalize=True)  # Normalize for ratios
+        print("Decay Product Ratios:")
         print(decay_products)
 
-        # Plot histogram of decay products
-        plt.hist(decay_products.index.astype(int), bins=np.arange(decay_products.index.astype(int).min(), decay_products.index.astype(int).max() + 1), weights=decay_products.values)
+        # Plot histogram of decay products with ratios
+        plt.bar(decay_products.index.astype(int), decay_products.values)
         plt.xlabel('Decay Product ID')
-        plt.ylabel('Count')
-        plt.title('Decay Products Histogram')
+        plt.ylabel('Ratio')
+        plt.title('Decay Products Ratio Histogram')
+        plt.xticks(rotation=45)
         plt.show()
 
     elif parameter == 'jet_stats':
@@ -41,34 +43,39 @@ def analyze_data(file_path, parameter, fixed_value=None):
         print(f"Number of unique jets: {len(unique_jets)}")
         print(f"Unique jet IDs: {unique_jets}")
 
-        # Create histograms for each unique jet
+        # Analyze production channels or decay products based on fixed_value
         for jet in unique_jets:
+            rows_with_jet = data[data['Jet_ID'].str.contains(f';?{jet};?')]
+
             if fixed_value == 0:  # Production channel bins
-                # Get all rows where the current jet ID appears
-                rows_with_jet = data[data['Jet_ID'].str.contains(f';?{jet};?')]
-                
-                # Count each production channel associated with this jet
-                production_channel_counts = rows_with_jet['ProductionChannel'].value_counts()
+                # Get the production channel counts for the current jet and normalize them
+                production_channel_counts = rows_with_jet['ProductionChannel'].value_counts(normalize=True)
 
-                # Ensure that production channels are counted twice if decay products are associated with the same jet
-                channel_repeated = production_channel_counts * 2
-
-                plt.bar(channel_repeated.index, channel_repeated.values)
+                plt.bar(production_channel_counts.index, production_channel_counts.values)
                 plt.xlabel('Production Channel')
-                plt.ylabel('Count (considering jet decay)')
-                plt.title(f'Jet ID {jet}: Production Channel Histogram')
+                plt.ylabel('Ratio')
+                plt.title(f'Jet ID {jet}: Production Channel Ratio Histogram')
+                plt.xticks(rotation=45)
                 plt.show()
 
-            elif fixed_value == 1:  # Decay product bins
-                rows_with_jet = data[data['Jet_ID'].str.contains(f';?{jet};?')]
+            elif fixed_value == 1:  # Decay product pairs
+                # Count decay product pairs instead of individual particles
+                decay_products = rows_with_jet['DecayProducts'].str.split(';', expand=True)
+                decay_pairs = decay_products.apply(lambda row: tuple(sorted(row.dropna().astype(int).values)), axis=1)
 
-                # Count each decay product associated with this jet
-                decay_products = rows_with_jet['DecayProducts'].str.split(';', expand=True).stack().astype(int).value_counts()
+                pair_counts = Counter(decay_pairs)
+                total_pairs = sum(pair_counts.values())
+                pair_ratios = {pair: count / total_pairs for pair, count in pair_counts.items()}
 
-                plt.bar(decay_products.index, decay_products.values)
-                plt.xlabel('Decay Product ID')
-                plt.ylabel('Count')
-                plt.title(f'Jet ID {jet}: Decay Product Histogram')
+                # Sort pairs by ratio
+                sorted_pairs = sorted(pair_ratios.items(), key=lambda x: -x[1])
+                labels, ratios = zip(*sorted_pairs)
+
+                plt.bar(range(len(ratios)), ratios, tick_label=labels)
+                plt.xlabel('Decay Product Pairs')
+                plt.ylabel('Ratio')
+                plt.title(f'Jet ID {jet}: Decay Product Pair Ratios')
+                plt.xticks(rotation=90)  # Rotate for readability
                 plt.show()
 
 if __name__ == "__main__":
