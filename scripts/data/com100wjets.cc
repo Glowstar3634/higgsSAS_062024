@@ -43,13 +43,13 @@ int main(int argc, char* argv[]) {
     }
 
 
-    // Initialize Pythia with proton-proton collisions at 13 TeV + enabled Higgs processes
+    // Initialize Pythia with proton-proton collisions at 100 TeV + enabled Higgs processes
     Pythia pythia;
     pythia.readString("Random:setSeed = on");
     pythia.readString("Random:seed = 0");
     pythia.readString("Beams:idA = 2212");
     pythia.readString("Beams:idB = 2212");
-    pythia.readString("Beams:eCM = 13.e3");
+    pythia.readString("Beams:eCM = 100.e3");
     pythia.readString("HiggsSM:all  = on");
     pythia.readString("25:onMode = on");
     pythia.init();
