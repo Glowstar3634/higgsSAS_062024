@@ -5,6 +5,9 @@ import sys
 def plot_histogram(data, parameter, fixed_value):
     if parameter == "production_channel":
         fixed_value = int(fixed_value)
+
+    if parameter == "jet_stats":
+        fixed_value = int(fixed_value)
     
     if parameter == "production_channel":
         print(f"Filtering for Production Channel {fixed_value} ...")
@@ -115,5 +118,5 @@ if __name__ == "__main__":
 
     input_file = sys.argv[1]
     parameter = sys.argv[2]
-    fixed_value = int(sys.argv[3])
+    fixed_value = sys.argv[3]
     main(input_file, parameter, fixed_value)
