@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
 from collections import Counter
 
 def analyze_data(file_path, parameter, fixed_value=None):
