@@ -15,9 +15,11 @@ def plot_histogram(data, parameter, fixed_value):
             print("No matching data found for this production channel.")
             return
         
-        ratios = filtered_data['DecayProducts'].str.split(';').explode().value_counts(normalize=True)
-        title = f'Decay Product Ratios for Production Channel {fixed_value}'
-        xlabel = 'Decay Products'
+        decay_pairs = filtered_data['DecayProducts'].str.split(';')
+        decay_pairs = pd.Series([tuple(sorted([decay[i], decay[i+1]])) for decay in decay_pairs for i in range(0, len(decay)-1, 2)]).value_counts(normalize=True)
+        title = f'Decay Product Pair Ratios for Production Channel {fixed_value}'
+        xlabel = 'Decay Product Pairs'
+
     
     elif parameter == "decay_products":
         print(f"Filtering for Decay Products containing {fixed_value} ...")
