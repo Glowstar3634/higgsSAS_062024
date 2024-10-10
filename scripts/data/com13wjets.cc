@@ -168,9 +168,9 @@ int main(int argc, char* argv[]) {
 
                         // Output jet data for each decay product's daughter particles
                         for (const std::string& property : {"pt", "eta", "phi", "m"}) {
-                            for (int decayIndex : decayProducts) {
-                                if (particleToJetMap.count(decayIndex)) {
-                                    int jetId = particleToJetMap[decayIndex];
+                            for (int decayIndex = 0 ; decayIndex < decayProducts.size(); decayIndex++) {
+                                if (particleToJetMap.count(decayProducts[decayIndex])) {
+                                    int jetId = particleToJetMap[decayProducts[decayIndex]];
                                     if (jetId < jets.size()) {  // Check if jetId is within the valid range
                                         PseudoJet jet = jets[jetId];
                                         if (property == "pt") {
@@ -189,20 +189,20 @@ int main(int argc, char* argv[]) {
                                     outFile << "-1";  // If decayIndex doesn't map to a jet
                                 }
 
-                                if (decayIndex != decayProducts.back()) outFile << ";";
+                                if (decayIndex != 1) outFile << ";";
                             }
                             outFile << ",";  // Move to the next column for the next property
                         }
 
                         // Output Jet ID for each decay product
-                        for (int decayIndex : decayProducts) {
-                            if (particleToJetMap.count(decayIndex)) {
-                                outFile << particleToJetMap[decayIndex];
+                        for (int decayIndex = 0 ; decayIndex < decayProducts.size(); decayIndex++) {
+                            if (particleToJetMap.count(decayProducts[decayIndex])) {
+                                outFile << particleToJetMap[decayProducts[decayIndex]];
                             } else {
                                 outFile << "-1";
                             }
 
-                            if (decayIndex != decayProducts.back()) outFile << ";";
+                            if (decayIndex != 1) outFile << ";";
                         }
                         outFile << "\n";
                     }
