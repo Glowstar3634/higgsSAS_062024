@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
     double R = 0.4;
     JetDefinition jet_def(antikt_algorithm, R);
 
-    int nEvents = 10;
+    int nEvents = 10000;
     int totalHCount = 0;
 
     // Write headers to the output file
