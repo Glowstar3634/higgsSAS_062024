@@ -71,8 +71,14 @@ def analyze_data(file_path, parameter, fixed_value=None):
                 plt.show()
 
 if __name__ == "__main__":
-    file_path = 'your_output_file.csv'
-    parameter = 'jet_stats'  # Change this to 'production_channel', 'decay_products', or 'jet_stats'
-    fixed_value = 0  # Set to 0 for production channel, 1 for decay products (only for 'jet_stats' mode)
-    
-    analyze_data(file_path, parameter, fixed_value)
+    if len(sys.argv) != 4:
+        print("Usage: python analyze3.py <input_file> <parameter> <fixed_value>")
+        print("Parameters: 'production_channel', 'decay_products', or 'jet_stats'")
+        print("fixed_value: 0 (production channels) or 1 (decay product pairs)")
+        sys.exit(1)
+
+    input_file = sys.argv[1]
+    parameter = sys.argv[2]
+    fixed_value = sys.argv[3]
+
+    main(input_file, parameter, fixed_value)
