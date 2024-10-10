@@ -16,7 +16,7 @@ def plot_histogram(data, parameter, fixed_value):
             return
         
         decay_pairs = filtered_data['DecayProducts'].str.split(';')
-        decay_pairs = pd.Series([tuple(sorted([decay[i], decay[i+1]])) for decay in decay_pairs for i in range(0, len(decay)-1, 2)]).value_counts(normalize=True)
+        ratios = pd.Series([tuple(sorted([decay[i], decay[i+1]])) for decay in decay_pairs for i in range(0, len(decay)-1, 2)]).value_counts(normalize=True)
         title = f'Decay Product Pair Ratios for Production Channel {fixed_value}'
         xlabel = 'Decay Product Pairs'
 
