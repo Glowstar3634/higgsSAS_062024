@@ -1,125 +1,78 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-import sys
+import numpy as np
+from collections import Counter
 
-def plot_histogram(data, parameter, fixed_value):
-    # Ensure fixed_value is of the correct type
-    if parameter == "production_channel":
-        fixed_value = int(fixed_value)
+def analyze_data(file_path, parameter, fixed_value=None):
+    # Load data from the CSV file
+    data = pd.read_csv(file_path)
 
-    # Filter the data based on the fixed parameter
-    if parameter == "production_channel":
-        print(f"Filtering for Production Channel {fixed_value}...")
-        filtered_data = data[data['ProductionChannel'] == fixed_value]
-        print(f"Total:\n{len(filtered_data)}")
-        
-        if filtered_data.empty:
-            print("No matching data found for this production channel.")
-            return
-        
-        ratios = filtered_data['DecayProducts'].str.split(';').explode().value_counts(normalize=True)
-        title = f'Decay Product Ratios for Production Channel {fixed_value}'
-        xlabel = 'Decay Products'
-    elif parameter == "decay_products":
-        print(f"Filtering for Decay Products containing {fixed_value}...")
-        filtered_data = data[data['DecayProducts'].str.contains(fixed_value, regex=False)]
-        print(f"Total:\n{len(filtered_data)}")
+    if parameter == 'production_channel':
+        # Analyze by production channel
+        production_channel_counts = data['ProductionChannel'].value_counts()
+        print("Production Channel Counts:")
+        print(production_channel_counts)
 
-        if filtered_data.empty:
-            print("No matching data found for these decay products.")
-            return
-        
-        ratios = filtered_data['ProductionChannel'].value_counts(normalize=True)
-        title = f'Production Channel Ratios for Decay Products {fixed_value}'
-        xlabel = 'Production Channels'
-    else:
-        print("Invalid parameter. Use 'production_channel', 'decay_products', or 'jet_stats'.")
-        return
-
-    # Plot the histogram
-    plt.figure(figsize=(10, 6))
-    ratios.plot(kind='bar', color='skyblue')
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel('Ratio')
-    plt.xticks(rotation=45)
-    plt.grid(axis='y')
-    plt.tight_layout()
-    plt.show()
-
-def plot_jet_histograms(data, fixed_value):
-    print("Plotting Jet Statistics...")
-
-    # Extract unique Jet_IDs from the data
-    unique_jet_ids = set([jet_id for sublist in data['Jet_ID'] for jet_id in sublist])
-    print(f"Unique Jet IDs found: {unique_jet_ids}")
-    
-    if not unique_jet_ids:
-        print("No valid Jet_IDs found in the data.")
-        return
-
-    for jet_id in unique_jet_ids:
-        print(f"Analyzing data for Jet_ID {jet_id}...")
-
-        # Filter the data for this Jet_ID
-        filtered_data = data[data['Jet_ID'].apply(lambda jet_list: jet_id in jet_list)]
-        print(f"Data found for Jet_ID {jet_id}: {len(filtered_data)} entries")
-
-        if filtered_data.empty:
-            print(f"No data found for Jet_ID {jet_id}. Skipping...")
-            continue
-
-        if fixed_value == 0:
-            # Plot production channel bins
-            ratios = filtered_data['ProductionChannel'].value_counts(normalize=True)
-            title = f'Production Channel Ratios for Jet_ID {jet_id}'
-            xlabel = 'Production Channels'
-        elif fixed_value == 1:
-            # Plot decay product pairs
-            decay_pairs = filtered_data['DecayProducts'].str.split(';')
-            ratios = pd.Series([tuple(sorted([dp[i], dp[j]])) for dp in decay_pairs for i in range(len(dp)) for j in range(i+1, len(dp))]).value_counts(normalize=True)
-            title = f'Decay Product Pair Ratios for Jet_ID {jet_id}'
-            xlabel = 'Decay Product Pairs'
-        else:
-            print(f"Invalid fixed_value: {fixed_value}. Use 0 for production channels or 1 for decay product pairs.")
-            return
-
-        # Plot the histogram for each Jet_ID
-        plt.figure(figsize=(10, 6))
-        print(f"Plotting histogram for Jet_ID {jet_id} with {len(ratios)} bins...")
-        ratios.plot(kind='bar', color='lightcoral')
-        plt.title(title)
-        plt.xlabel(xlabel)
-        plt.ylabel('Ratio')
-        plt.xticks(rotation=45)
-        plt.grid(axis='y')
-        plt.tight_layout()
+        # Plot histogram of production channels
+        plt.hist(data['ProductionChannel'], bins=np.arange(data['ProductionChannel'].min(), data['ProductionChannel'].max() + 1))
+        plt.xlabel('Production Channel')
+        plt.ylabel('Count')
+        plt.title('Production Channel Histogram')
         plt.show()
 
-def main(input_file, parameter, fixed_value):
-    # Read the CSV file
-    data = pd.read_csv(input_file)
-    
-    # Convert necessary columns to appropriate data types
-    data['ProductionChannel'] = data['ProductionChannel'].astype(int)
-    data['Jet_ID'] = data['Jet_ID'].apply(lambda x: [int(i) for i in x.split(';')] if pd.notna(x) else [])
+    elif parameter == 'decay_products':
+        # Analyze by decay products
+        decay_products = data['DecayProducts'].str.split(';', expand=True).stack().value_counts()
+        print("Decay Product Counts:")
+        print(decay_products)
 
-    # Handle the 'jet_stats' parameter
-    if parameter == 'jet_stats':
-        plot_jet_histograms(data, int(fixed_value))
-    else:
-        # Call the function to plot the histogram for production_channel or decay_products
-        plot_histogram(data, parameter, fixed_value)
+        # Plot histogram of decay products
+        plt.hist(decay_products.index.astype(int), bins=np.arange(decay_products.index.astype(int).min(), decay_products.index.astype(int).max() + 1), weights=decay_products.values)
+        plt.xlabel('Decay Product ID')
+        plt.ylabel('Count')
+        plt.title('Decay Products Histogram')
+        plt.show()
+
+    elif parameter == 'jet_stats':
+        # Analyze by jet stats
+        jet_ids = data['Jet_ID'].str.split(';', expand=True).stack().astype(int)
+        unique_jets = jet_ids.unique()
+        print(f"Number of unique jets: {len(unique_jets)}")
+        print(f"Unique jet IDs: {unique_jets}")
+
+        # Create histograms for each unique jet
+        for jet in unique_jets:
+            if fixed_value == 0:  # Production channel bins
+                # Get all rows where the current jet ID appears
+                rows_with_jet = data[data['Jet_ID'].str.contains(f';?{jet};?')]
+                
+                # Count each production channel associated with this jet
+                production_channel_counts = rows_with_jet['ProductionChannel'].value_counts()
+
+                # Ensure that production channels are counted twice if decay products are associated with the same jet
+                channel_repeated = production_channel_counts * 2
+
+                plt.bar(channel_repeated.index, channel_repeated.values)
+                plt.xlabel('Production Channel')
+                plt.ylabel('Count (considering jet decay)')
+                plt.title(f'Jet ID {jet}: Production Channel Histogram')
+                plt.show()
+
+            elif fixed_value == 1:  # Decay product bins
+                rows_with_jet = data[data['Jet_ID'].str.contains(f';?{jet};?')]
+
+                # Count each decay product associated with this jet
+                decay_products = rows_with_jet['DecayProducts'].str.split(';', expand=True).stack().astype(int).value_counts()
+
+                plt.bar(decay_products.index, decay_products.values)
+                plt.xlabel('Decay Product ID')
+                plt.ylabel('Count')
+                plt.title(f'Jet ID {jet}: Decay Product Histogram')
+                plt.show()
 
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
-        print("Usage: python analyze2.py <input_file> <parameter> <fixed_value>")
-        print("Parameters: 'production_channel', 'decay_products', or 'jet_stats'")
-        print("fixed_value: 0 (production channels) or 1 (decay product pairs)")
-        sys.exit(1)
-
-    input_file = sys.argv[1]
-    parameter = sys.argv[2]
-    fixed_value = sys.argv[3]
-
-    main(input_file, parameter, fixed_value)
+    file_path = 'your_output_file.csv'
+    parameter = 'jet_stats'  # Change this to 'production_channel', 'decay_products', or 'jet_stats'
+    fixed_value = 0  # Set to 0 for production channel, 1 for decay products (only for 'jet_stats' mode)
+    
+    analyze_data(file_path, parameter, fixed_value)
