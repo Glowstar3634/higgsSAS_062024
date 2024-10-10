@@ -80,6 +80,6 @@ if __name__ == "__main__":
 
     input_file = sys.argv[1]
     parameter = sys.argv[2]
-    fixed_value = sys.argv[3]
+    fixed_value = int(sys.argv[3])
 
     analyze_data(input_file, parameter, fixed_value)
