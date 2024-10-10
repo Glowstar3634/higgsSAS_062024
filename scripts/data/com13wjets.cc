@@ -93,10 +93,13 @@ int main(int argc, char* argv[]) {
                 std::vector<Vec4> momenta;
                 int productionChannel = pythia.info.code();
 
+                std::map<int, int> particleIdToIndexMap;
+
                 for (int k = 0; k < pythia.event.size(); k++) {
                     if (pythia.event[k].mother1() == j || pythia.event[k].mother2() == j) {
                         decayProducts.push_back(pythia.event[k].id());
                         momenta.push_back(pythia.event[k].p());
+                        particleIdToIndexMap[pythia.event[k].id()] = k;
                     }
                 }
 
@@ -148,8 +151,9 @@ int main(int argc, char* argv[]) {
                         // For each decay product, trace its final state descendants and check if they belong to a jet
                         std::set<int> jetIDsWithDecayProducts;
                         for (int decayIndex : decayProducts) {
+                            int indexInEvent = particleIdToIndexMap[decayIndex];
                             std::vector<int> finalStateParticles;
-                            traceToFinalState(pythia.event, decayIndex, finalStateParticles);
+                            traceToFinalState(pythia.event, indexInEvent, finalStateParticles);
 
                             std::cout << "Checkpoint: Family traced for decay product " << decayIndex << std::endl;
 
