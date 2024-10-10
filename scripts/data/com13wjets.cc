@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <map>
+#include <set>
 #include "Pythia8/Pythia.h"
 #include "fastjet/ClusterSequence.hh"
 
@@ -143,34 +144,29 @@ int main(int argc, char* argv[]) {
                             }
                         }
 
-                        //Output jet data for each  decay product's daughter particles
+                        // Output jet data for each decay product's daughter particles
                         for (const std::string& property : {"pt", "eta", "phi", "m"}) {
                             for (int decayIndex : decayProducts) {
-                                if (particleToJetMap.count(decayIndex)) {
+                                if (particleToJetMap.count(decayIndex) && particleToJetMap[decayIndex] < jets.size()) {
                                     int jetId = particleToJetMap[decayIndex];
-                                    if (jetId < jets.size()) {  // Check if jetId is within the valid range
-                                        PseudoJet jet = jets[jetId];
-                                        if (property == "pt") {
-                                            outFile << jet.pt();
-                                        } else if (property == "eta") {
-                                            outFile << jet.eta();
-                                        } else if (property == "phi") {
-                                            outFile << jet.phi();
-                                        } else if (property == "m") {
-                                            outFile << jet.m();
-                                        }
-                                    } else {
-                                        outFile << "-1";  // If jetId is out of range
+                                    PseudoJet jet = jets[jetId];
+                                    if (property == "pt") {
+                                        outFile << jet.pt();
+                                    } else if (property == "eta") {
+                                        outFile << jet.eta();
+                                    } else if (property == "phi") {
+                                        outFile << jet.phi();
+                                    } else if (property == "m") {
+                                        outFile << jet.m();
                                     }
                                 } else {
-                                    outFile << "-1";  // If decayIndex doesn't map to a jet
+                                    outFile << "-1";  // If decayIndex doesn't map to a valid jet
                                 }
 
                                 if (decayIndex != decayProducts.back()) outFile << ";";
                             }
                             outFile << ",";  // Move to the next column for the next property
                         }
-
 
                         // Output Jet ID for each decay product
                         for (int decayIndex : decayProducts) {
