@@ -5,7 +5,7 @@ const app = express();
 const port = 8080;
 
 app.get('/generate', (req, res) => {
-    const child = spawn('/home/ubuntu/pythia8312/scripts/pgen6.06', ['/home/ubuntu/pythia8312/scripts/particleData6_06.csv']);
+    const child = spawn('/home/ubuntu/pythia8312/scripts/pgen6.07', ['/home/ubuntu/pythia8312/scripts/particleData6_07.csv']);
 
     child.stdout.on('data', (data) => {
         console.log(`stdout: ${data}`);
@@ -23,7 +23,7 @@ app.get('/generate', (req, res) => {
     child.on('close', (code) => {
         console.log(`Child process exited with code ${code}`);
         if (code === 0) {
-            res.sendFile(path.resolve('/home/ubuntu/pythia8312/scripts/particleData6_06.csv'));
+            res.sendFile(path.resolve('/home/ubuntu/pythia8312/scripts/particleData6_07.csv'));
         } else {
             res.status(500).send(`Process failed with exit code ${code}`);
         }
