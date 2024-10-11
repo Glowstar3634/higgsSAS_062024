@@ -3,6 +3,30 @@ import matplotlib.pyplot as plt
 import sys
 import os
 
+expected_ratios = {
+    "production_channel": {
+        "902": 0.8610,
+        "907": 0.0501,
+        "905": 0.0313,
+        "906": 0.0203,
+        "904": 0.0185,
+        "901": 0.0091,
+        "908": 0.0038,
+        "909": 0.0019,
+    },
+    "decay_products": {
+        "5;-5": 0.571,
+        "24;-24": 0.22,
+        "21;21": 0.0853,
+        "15;-15": 0.0626,
+        "4;-4": 0.0288,
+        "23;23": 0.0273,    
+        "22;22": 0.00228,
+        "22;23": 0.00157,
+        "13;-13": 0.00022,
+    }
+}
+
 def plot_histogram(data, parameter, fixed_value, file_name):
     if parameter == "production_channel":
         fixed_value = int(fixed_value)

@@ -42,15 +42,26 @@ def get_production_channel_bins(filtered_data):
     return filtered_data['ProductionChannel'].value_counts()
 
 def calculate_chi_square(observed_bins, expected_bins):
+    total_observed = sum(observed_bins)  # Total number of observed events
+
     # Ensure all expected bins are in the observed bins
-    expected_counts = [expected_bins.get(bin_name, 0) * sum(observed_bins) for bin_name in expected_bins]
-    
-    # Prepare observed counts, ensuring missing bins are treated as zero
-    observed_counts = [observed_bins.get(bin_name, 0) for bin_name in expected_bins]
+    expected_counts = []
+    observed_counts = []
+
+    for bin_name, expected_ratio in expected_bins.items():
+        observed_count = observed_bins.get(bin_name, 0)  # If bin is missing in observed, count as 0
+        expected_count = expected_ratio * total_observed  # Expected count based on the total observed
+
+        observed_counts.append(observed_count)
+        expected_counts.append(expected_count)
+
+    if total_observed == 0:
+        print("No observed data to analyze.")
+        return
 
     # Perform chi-square test
     chi2, p = chisquare(f_obs=observed_counts, f_exp=expected_counts)
-    
+
     print(f"Chi-Square Statistic: {chi2}")
     print(f"P-value: {p}")
 
