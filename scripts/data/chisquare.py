@@ -17,12 +17,16 @@ def get_decay_product_bins(filtered_data):
 def get_production_channel_bins(filtered_data):
     return filtered_data['ProductionChannel'].value_counts()
 
-def run_chi_square(expected_bins, observed_bins):
-    expected = expected_bins.reindex(observed_bins.index, fill_value=0)
-    observed = observed_bins.reindex(expected_bins.index, fill_value=0)
+def run_chi_square(expected, observed):
+    total_expected = sum(expected)
+    total_observed = sum(observed)
+    
+    if total_expected != total_observed:
+        expected = [e * (total_observed / total_expected) for e in expected]
     
     chi2, p = chisquare(f_obs=observed, f_exp=expected)
-    print(f"Chi-square test statistic: {chi2}")
+    
+    print(f"Chi-Square Statistic: {chi2}")
     print(f"P-value: {p}")
 
 def main(expected_file, observed_file, filter_type, filter_value):
