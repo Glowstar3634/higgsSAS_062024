@@ -18,13 +18,21 @@ def get_production_channel_bins(filtered_data):
     return filtered_data['ProductionChannel'].value_counts()
 
 def run_chi_square(expected, observed):
-    total_expected = sum(expected)
-    total_observed = sum(observed)
+    all_bins = set(expected.keys()).union(set(observed.keys()))
+    
+    expected = {bin: expected.get(bin, 0) for bin in all_bins}
+    observed = {bin: observed.get(bin, 0) for bin in all_bins}
+    
+    expected_values = list(expected.values())
+    observed_values = list(observed.values())
+    total_expected = sum(expected_values)
+    total_observed = sum(observed_values)
     
     if total_expected != total_observed:
-        expected = [e * (total_observed / total_expected) for e in expected]
+        expected_values = [e * (total_observed / total_expected) for e in expected_values]
     
-    chi2, p = chisquare(f_obs=observed, f_exp=expected)
+    # Run the chi-square test
+    chi2, p = chisquare(f_obs=observed_values, f_exp=expected_values)
     
     print(f"Chi-Square Statistic: {chi2}")
     print(f"P-value: {p}")
@@ -33,7 +41,7 @@ def main(expected_file, observed_file, filter_type, filter_value):
     expected_data = pd.read_csv(expected_file)
     observed_data = pd.read_csv(observed_file)
     
-    filter_value = str(filter_value)  # Ensure filter_value is a string
+    filter_value = str(filter_value) 
 
     # Apply the appropriate filter
     if filter_type == "production_channel":
