@@ -21,7 +21,6 @@ def get_production_channel_bins(filtered_data):
 # Remove bins with 0 counts in either the observed or expected datasets
 def calculate_chi_square(observed_bins, expected_ratios, filter_value):
     total_observed = sum(observed_bins)  # Total number of observed events
-    total_expected = expected_ratios[filter_value] * total_observed  # Normalize expected bins
 
     # Ensure all expected bins are in the observed bins
     expected_counts = []
