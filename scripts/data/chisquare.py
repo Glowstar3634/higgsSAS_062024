@@ -94,7 +94,12 @@ def main(observed_file, filter_type, filter_value):
     }
 
     # Perform chi-square goodness of fit test
-    calculate_chi_square(observed_bins, expected_ratios[filter_type], filter_value)
+    if filter_type == "production_channel":
+        calculate_chi_square(observed_bins, expected_ratios["decay_products"], filter_value)
+        
+    elif filter_type == "decay_products":
+        calculate_chi_square(observed_bins, expected_ratios["production_channel"], filter_value)
+    
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
