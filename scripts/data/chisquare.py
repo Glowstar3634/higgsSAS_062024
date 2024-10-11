@@ -22,20 +22,9 @@ def run_chi_square(expected, observed):
     
     expected = {bin: expected.get(bin, 0) for bin in all_bins}
     observed = {bin: observed.get(bin, 0) for bin in all_bins}
-    
-    # Convert dictionaries back to lists for the chi-square test
     expected_values = list(expected.values())
     observed_values = list(observed.values())
     
-    # Normalize expected values to match observed total if sums differ
-    total_expected = sum(expected_values)
-    total_observed = sum(observed_values)
-    
-    if total_expected != total_observed:
-        scaling_factor = total_observed / total_expected
-        expected_values = [e * scaling_factor for e in expected_values]
-    
-    # Filter out bins where the expected value is zero to avoid division by zero
     filtered_expected = []
     filtered_observed = []
     for e, o in zip(expected_values, observed_values):
@@ -43,13 +32,19 @@ def run_chi_square(expected, observed):
             filtered_expected.append(e)
             filtered_observed.append(o)
     
-    # Run the chi-square test if there are valid bins left
+    total_filtered_expected = sum(filtered_expected)
+    total_filtered_observed = sum(filtered_observed)
+    if total_filtered_expected != total_filtered_observed:
+        scaling_factor = total_filtered_observed / total_filtered_expected
+        filtered_expected = [e * scaling_factor for e in filtered_expected]
+    
     if filtered_expected and filtered_observed:
         chi2, p = chisquare(f_obs=filtered_observed, f_exp=filtered_expected)
         print(f"Chi-Square Statistic: {chi2}")
         print(f"P-value: {p}")
     else:
         print("No valid bins available for chi-square test.")
+
 
 def main(expected_file, observed_file, filter_type, filter_value):
     expected_data = pd.read_csv(expected_file)
