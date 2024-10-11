@@ -2,6 +2,12 @@ import pandas as pd
 import sys
 from scipy.stats import chisquare
 
+# Function to normalize the ratios so that they sum to 1
+def normalize_expected_ratios(ratios):
+    total = sum(ratios.values())
+    return {key: value / total for key, value in ratios.items()}
+
+# Original expected_ratios object
 expected_ratios = {
     "production_channel": {
         "902": 0.8610,
@@ -19,12 +25,16 @@ expected_ratios = {
         "21;21": 0.0853,
         "15;-15": 0.0626,
         "4;-4": 0.0288,
-        "23;23": 0.0273,    
+        "23;23": 0.0273,
         "22;22": 0.00228,
         "22;23": 0.00157,
         "13;-13": 0.00022,
     }
 }
+
+# Normalize the expected ratios for both categories
+expected_ratios["production_channel"] = normalize_expected_ratios(expected_ratios["production_channel"])
+expected_ratios["decay_products"] = normalize_expected_ratios(expected_ratios["decay_products"])
 
 def filter_data_by_production_channel(data, channel):
     print(f"Filtering for Production Channel {channel} ...")
@@ -50,7 +60,7 @@ def calculate_chi_square(observed_bins, expected_bins):
 
     for bin_name, expected_ratio in expected_bins.items():
         observed_count = observed_bins.get(bin_name, 0)  # If bin is missing in observed, count as 0
-        expected_count = expected_ratio * total_observed  # Expected count based on the total observed
+        expected_count = expected_ratio * total_observed  # Expected count based on the normalized ratio
 
         observed_counts.append(observed_count)
         expected_counts.append(expected_count)
