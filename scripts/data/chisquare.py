@@ -2,12 +2,7 @@ import pandas as pd
 import sys
 from scipy.stats import chisquare
 
-# Function to normalize the ratios so that they sum to 1
-def normalize_expected_ratios(ratios):
-    total = sum(ratios.values())
-    return {key: value / total for key, value in ratios.items()}
-
-# Original expected_ratios object
+# Define the expected_ratios object
 expected_ratios = {
     "production_channel": {
         "902": 0.8610,
@@ -32,10 +27,7 @@ expected_ratios = {
     }
 }
 
-# Normalize the expected ratios for both categories
-expected_ratios["production_channel"] = normalize_expected_ratios(expected_ratios["production_channel"])
-expected_ratios["decay_products"] = normalize_expected_ratios(expected_ratios["decay_products"])
-
+# Load observed data and filter as needed
 def filter_data_by_production_channel(data, channel):
     print(f"Filtering for Production Channel {channel} ...")
     return data[data['ProductionChannel'] == channel]
@@ -51,23 +43,15 @@ def get_decay_product_bins(filtered_data):
 def get_production_channel_bins(filtered_data):
     return filtered_data['ProductionChannel'].value_counts()
 
-def calculate_chi_square(observed_bins, expected_bins):
+# Remove bins with 0 counts in either the observed or expected datasets
+def calculate_chi_square(observed_bins, expected_ratios):
     total_observed = sum(observed_bins)  # Total number of observed events
 
-    # Ensure all expected bins are in the observed bins
-    expected_counts = []
-    observed_counts = []
-
-    for bin_name, expected_ratio in expected_bins.items():
-        observed_count = observed_bins.get(bin_name, 0)  # If bin is missing in observed, count as 0
-        expected_count = expected_ratio * total_observed  # Expected count based on the normalized ratio
-
-        observed_counts.append(observed_count)
-        expected_counts.append(expected_count)
-
-    if total_observed == 0:
-        print("No observed data to analyze.")
-        return
+    # Calculate expected counts based on the expected ratios
+    expected_counts = [total_observed * expected_ratios.get(bin_name, 0) for bin_name in observed_bins.index]
+    
+    # Remove bins with 0 counts
+    observed_counts = [observed_bins[bin_name] for bin_name in observed_bins.index]
 
     # Perform chi-square test
     chi2, p = chisquare(f_obs=observed_counts, f_exp=expected_counts)
@@ -76,31 +60,32 @@ def calculate_chi_square(observed_bins, expected_bins):
     print(f"P-value: {p}")
 
 def main(observed_file, filter_type, filter_value):
+    # Load observed data
     observed_data = pd.read_csv(observed_file)
-    
     filter_value = str(filter_value) 
 
     # Apply the appropriate filter
     if filter_type == "production_channel":
         observed_filtered = filter_data_by_production_channel(observed_data, int(filter_value))
         observed_bins = get_decay_product_bins(observed_filtered)
-        expected_bins = expected_ratios["decay_products"]
         
     elif filter_type == "decay_products":
         observed_filtered = filter_data_by_decay_products(observed_data, filter_value)
         observed_bins = get_production_channel_bins(observed_filtered)
-        expected_bins = expected_ratios["production_channel"]
 
     else:
         print("Invalid filter type. Use 'production_channel' or 'decay_products'.")
         sys.exit(1)
+
+    # Get the expected ratios based on the filter type
+    expected_bins = expected_ratios[filter_type]
 
     # Perform chi-square goodness of fit test
     calculate_chi_square(observed_bins, expected_bins)
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
-        print("Usage: python chi_square_test.py <observed_file> <filter_type> <filter_value>")
+        print("Usage: python chisquare.py <observed_file> <filter_type> <filter_value>")
         print("filter_type: 'production_channel' or 'decay_products'")
         print("filter_value: the value for filtering (e.g., 902 or '5;-5')")
         sys.exit(1)
