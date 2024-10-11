@@ -18,21 +18,34 @@ def get_production_channel_bins(filtered_data):
     return filtered_data['ProductionChannel'].value_counts()
 
 def run_chi_square(expected, observed):
+    # Align the expected and observed bins by filling in missing categories
     all_bins = set(expected.keys()).union(set(observed.keys()))
     
+    # Make sure every bin is represented in both expected and observed datasets
     expected = {bin: expected.get(bin, 0) for bin in all_bins}
     observed = {bin: observed.get(bin, 0) for bin in all_bins}
     
+    # Convert dictionaries back to lists for the chi-square test
     expected_values = list(expected.values())
     observed_values = list(observed.values())
+    
+    # Ensure the sums of expected and observed bins are equal by normalizing
     total_expected = sum(expected_values)
     total_observed = sum(observed_values)
     
     if total_expected != total_observed:
         expected_values = [e * (total_observed / total_expected) for e in expected_values]
     
+    # Filter out bins where expected value is zero
+    filtered_expected = []
+    filtered_observed = []
+    for e, o in zip(expected_values, observed_values):
+        if e != 0:
+            filtered_expected.append(e)
+            filtered_observed.append(o)
+    
     # Run the chi-square test
-    chi2, p = chisquare(f_obs=observed_values, f_exp=expected_values)
+    chi2, p = chisquare(f_obs=filtered_observed, f_exp=filtered_expected)
     
     print(f"Chi-Square Statistic: {chi2}")
     print(f"P-value: {p}")
