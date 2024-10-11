@@ -1,8 +1,9 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import sys
+import os
 
-def plot_histogram(data, parameter, fixed_value):
+def plot_histogram(data, parameter, fixed_value, file_name):
     if parameter == "production_channel":
         fixed_value = int(fixed_value)
 
@@ -20,7 +21,7 @@ def plot_histogram(data, parameter, fixed_value):
         
         decay_pairs = filtered_data['DecayProducts'].str.split(';')
         ratios = pd.Series([tuple(sorted([decay[i], decay[i+1]])) for decay in decay_pairs for i in range(0, len(decay)-1, 2)]).value_counts(normalize=True)
-        title = f'Decay Product Pair Ratios for Production Channel {fixed_value}'
+        title = f'Decay Product Pair Ratios for Production Channel {fixed_value} - {file_name}'
         xlabel = 'Decay Product Pairs'
 
     
@@ -34,7 +35,7 @@ def plot_histogram(data, parameter, fixed_value):
             return
         
         ratios = filtered_data['ProductionChannel'].value_counts(normalize=True)
-        title = f'Production Channel Ratios for Decay Products {fixed_value}'
+        title = f'Production Channel Ratios for Decay Products {fixed_value} - {file_name}'
         xlabel = 'Production Channels'
     
     else:
@@ -52,7 +53,7 @@ def plot_histogram(data, parameter, fixed_value):
     plt.tight_layout()
     plt.show()
 
-def plot_jet_histograms(data, fixed_value):
+def plot_jet_histograms(data, fixed_value, file_name):
     print("Plotting Jet Statistics...")
 
     unique_jet_ids = set([jet_id for sublist in data['Jet_ID'] for jet_id in sublist])
@@ -74,13 +75,13 @@ def plot_jet_histograms(data, fixed_value):
 
         if fixed_value == 0:
             ratios = filtered_data['ProductionChannel'].value_counts(normalize=True)
-            title = f'Production Channel Ratios for Jet_ID {jet_id}'
+            title = f'Production Channel Ratios for Jet_ID {jet_id} - {file_name}'
             xlabel = 'Production Channels'
         
         elif fixed_value == 1:
             decay_pairs = filtered_data['DecayProducts'].str.split(';')
             ratios = pd.Series([tuple(sorted([dp[i], dp[j]])) for dp in decay_pairs for i in range(len(dp)) for j in range(i+1, len(dp))]).value_counts(normalize=True)
-            title = f'Decay Product Pair Ratios for Jet_ID {jet_id}'
+            title = f'Decay Product Pair Ratios for Jet_ID {jet_id} - {file_name}'
             xlabel = 'Decay Product Pairs'
         
         else:
@@ -104,10 +105,13 @@ def main(input_file, parameter, fixed_value):
     data['ProductionChannel'] = data['ProductionChannel'].astype(int)
     data['Jet_ID'] = data['Jet_ID'].apply(lambda x: [int(i) for i in x.split(';')] if pd.notna(x) else [])
     
+    # Extract file name from the input file
+    file_name = os.path.basename(input_file)
+    
     if parameter == 'jet_stats':
-        plot_jet_histograms(data, int(fixed_value))
+        plot_jet_histograms(data, int(fixed_value), file_name)
     else:
-        plot_histogram(data, parameter, fixed_value)
+        plot_histogram(data, parameter, fixed_value, file_name)
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
