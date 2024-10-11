@@ -2,7 +2,6 @@ import pandas as pd
 import sys
 from scipy.stats import chisquare
 
-# Expected ratios object
 expected_ratios = {
     "production_channel": {
         "902": 0.8610,
@@ -43,14 +42,11 @@ def get_production_channel_bins(filtered_data):
     return filtered_data['ProductionChannel'].value_counts()
 
 def calculate_chi_square(observed_bins, expected_bins):
-    # Ensure observed_bins contains all expected keys
-    for key in expected_bins.keys():
-        if key not in observed_bins:
-            observed_bins[key] = 0  # Count missing bins as zero
-
-    # Get observed and expected counts
-    observed_counts = [observed_bins.get(key, 0) for key in expected_bins.keys()]
-    expected_counts = [value * sum(observed_counts) for value in expected_bins.values()]
+    # Ensure all expected bins are in the observed bins
+    expected_counts = [expected_bins.get(bin_name, 0) * sum(observed_bins) for bin_name in expected_bins]
+    
+    # Prepare observed counts, ensuring missing bins are treated as zero
+    observed_counts = [observed_bins.get(bin_name, 0) for bin_name in expected_bins]
 
     # Perform chi-square test
     chi2, p = chisquare(f_obs=observed_counts, f_exp=expected_counts)
@@ -59,10 +55,9 @@ def calculate_chi_square(observed_bins, expected_bins):
     print(f"P-value: {p}")
 
 def main(observed_file, filter_type, filter_value):
-    # Read the observed data
     observed_data = pd.read_csv(observed_file)
     
-    filter_value = str(filter_value)
+    filter_value = str(filter_value) 
 
     # Apply the appropriate filter
     if filter_type == "production_channel":
@@ -74,13 +69,13 @@ def main(observed_file, filter_type, filter_value):
         observed_filtered = filter_data_by_decay_products(observed_data, filter_value)
         observed_bins = get_production_channel_bins(observed_filtered)
         expected_bins = expected_ratios["production_channel"]
-    
+
     else:
         print("Invalid filter type. Use 'production_channel' or 'decay_products'.")
         sys.exit(1)
 
     # Perform chi-square goodness of fit test
-    calculate_chi_square(observed_bins.to_dict(), expected_bins)
+    calculate_chi_square(observed_bins, expected_bins)
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
