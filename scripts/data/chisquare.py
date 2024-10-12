@@ -32,20 +32,46 @@ def get_jet_bins(filtered_data):
     return filtered_data['Jet_ID'].value_counts()
 
 # Remove bins with 0 counts in either the observed or expected datasets
-def calculate_chi_square(observed_bins, expected_ratios):
+def calculate_chi_square(observed_bins, expected_ratios, filter_value):
     total_observed = sum(observed_bins)  # Total number of observed events
     print(f"Total Observed: {total_observed}...")
 
     expected_counts = []
     observed_counts = []
 
-    for bin_name, expected_ratio in expected_ratios.items():
-        expected_count = expected_ratio * total_observed  # Calculate expected count
-        observed_count = observed_bins.get(bin_name, 0)  # Count as 0 if bin is missing
+    if filter_type == "production_channel":
+        for bin_name in expected_ratios.keys():
+            expected_count = expected_ratios[bin_name] * total_observed  # Calculate expected count
+            print(f"checking bin {bin_name}...")
+            observed_count = observed_bins.get(bin_name, 0)  # Count as 0 if bin is missing
 
-        if observed_count > 0 and expected_count > 0:  # Only consider non-zero counts
             observed_counts.append(observed_count)
             expected_counts.append(expected_count)
+    elif filter_type == "decay_products":
+        for bin_name in expected_ratios.keys():
+            expected_count = expected_ratios[bin_name] * total_observed  # Calculate expected count
+            print(f"checking bin {bin_name}...")
+            observed_count = observed_bins.get(int(bin_name), 0)  # Count as 0 if bin is missing
+
+            observed_counts.append(observed_count)
+            expected_counts.append(expected_count)
+    else:
+        if filter_value == "1":
+            for bin_name in expected_ratios.keys():
+                expected_count = expected_ratios[bin_name] * total_observed  # Calculate expected count
+                print(f"checking bin {bin_name}...")
+                observed_count = observed_bins.get(bin_name, 0)  # Count as 0 if bin is missing
+
+                observed_counts.append(observed_count)
+                expected_counts.append(expected_count)
+        elif filter_value == "0":
+            for bin_name in expected_ratios.keys():
+                expected_count = expected_ratios[bin_name] * total_observed  # Calculate expected count
+                print(f"checking bin {bin_name}...")
+                observed_count = observed_bins.get(int(bin_name), 0)  # Count as 0 if bin is missing
+
+                observed_counts.append(observed_count)
+                expected_counts.append(expected_count)
 
     if len(observed_counts) == 0:
         print("No valid bins for chi-square calculation.")
@@ -125,16 +151,16 @@ def main(observed_file, filter_type, filter_value):
 
     # Perform chi-square goodness of fit test
     if filter_type == "production_channel" or filter_type == "jet_stats":
-        calculate_chi_square(observed_bins, expected_ratios["decay_products"])
+        calculate_chi_square(observed_bins, expected_ratios["decay_products"], filter_value)
         
     elif filter_type == "decay_products":
-        calculate_chi_square(observed_bins, expected_ratios["production_channel"])
+        calculate_chi_square(observed_bins, expected_ratios["production_channel"], filter_value)
 
     else:
         if filter_value == 0:
-            calculate_chi_square(observed_bins, expected_ratios["production_channel"])
+            calculate_chi_square(observed_bins, expected_ratios["production_channel"], filter_value)
         elif filter_value == 1:
-            calculate_chi_square(observed_bins, expected_ratios["decay_products"])
+            calculate_chi_square(observed_bins, expected_ratios["decay_products"], filter_value)
         else:
             print("Invalid filter value. Use 0 for production channel bins, or 1 for decay product bins.")
             sys.exit(1)
