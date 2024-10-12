@@ -157,9 +157,9 @@ def main(observed_file, filter_type, filter_value):
         calculate_chi_square(observed_bins, expected_ratios["production_channel"], filter_value)
 
     else:
-        if filter_value == 0:
+        if filter_value == "0":
             calculate_chi_square(observed_bins, expected_ratios["production_channel"], filter_value)
-        elif filter_value == 1:
+        elif filter_value == "1":
             calculate_chi_square(observed_bins, expected_ratios["decay_products"], filter_value)
         else:
             print("Invalid filter value. Use 0 for production channel bins, or 1 for decay product bins.")
