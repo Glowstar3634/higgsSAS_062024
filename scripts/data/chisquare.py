@@ -34,7 +34,7 @@ def calculate_chi_square(observed_bins, expected_ratios, filter_value):
     for bin_name in expected_ratios.keys():
         expected_count = expected_ratios[bin_name] * total_observed  # Calculate expected count
         print(f"checking bin {bin_name}...")
-        observed_count = observed_bins.get(bin_name, 0)  # Count as 0 if bin is missing
+        observed_count = observed_bins.get(int(bin_name), 0)  # Count as 0 if bin is missing
 
         observed_counts.append(observed_count)
         expected_counts.append(expected_count)
