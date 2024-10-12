@@ -13,7 +13,8 @@ def filter_data_by_decay_products(data, decay_products):
 
 def get_decay_product_bins(filtered_data):
     decay_pairs = filtered_data['DecayProducts'].str.split(';')
-    return pd.Series([tuple(sorted([decay[i], decay[i+1]])) for decay in decay_pairs for i in range(0, len(decay)-1, 2)]).value_counts()
+    # Create keys in the format "#;#"
+    return pd.Series([f"{decay[i]};{decay[i+1]}" for decay in decay_pairs for i in range(0, len(decay)-1, 2)]).value_counts()
 
 def get_production_channel_bins(filtered_data):
     return filtered_data['ProductionChannel'].value_counts()
