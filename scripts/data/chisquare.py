@@ -56,7 +56,7 @@ def calculate_chi_square(observed_bins, expected_ratios, filter_value):
             observed_counts.append(observed_count)
             expected_counts.append(expected_count)
     else:
-        if filter_value == "0":
+        if filter_value == "1":
             for bin_name in expected_ratios.keys():
                 expected_count = expected_ratios[bin_name] * total_observed  # Calculate expected count
                 print(f"checking bin {bin_name}...")
@@ -64,7 +64,7 @@ def calculate_chi_square(observed_bins, expected_ratios, filter_value):
 
                 observed_counts.append(observed_count)
                 expected_counts.append(expected_count)
-        elif filter_value == "1":
+        elif filter_value == "0":
             for bin_name in expected_ratios.keys():
                 expected_count = expected_ratios[bin_name] * total_observed  # Calculate expected count
                 print(f"checking bin {bin_name}...")
