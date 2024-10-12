@@ -2,6 +2,10 @@ import pandas as pd
 import sys
 from scipy.stats import chisquare
 
+def normalize_ratios(ratios):
+    total = sum(ratios.values())
+    return {key: value / total for key, value in ratios.items()} if total > 0 else ratios
+
 def filter_data_by_jet_stats(data):
     print(f"Filtering for Leading Jet (jetID == 0 for either jet in the pair) ...")
     data[['Jet1', 'Jet2']] = data['Jet_ID'].str.split(';', expand=True).astype(int)
@@ -135,6 +139,7 @@ def main(observed_file, filter_type, filter_value):
             "901": 0.0091,
             "908": 0.0038,
             "909": 0.0019,
+            "903": 0.0001,
         },
         "decay_products": {
             "5;-5": 0.571,
@@ -145,9 +150,13 @@ def main(observed_file, filter_type, filter_value):
             "23;23": 0.0273,
             "22;22": 0.00228,
             "22;23": 0.00157,
+            "3;-3": 0.00044,
             "13;-13": 0.00022,
         }
     }
+    expected_ratios["production_channel"] = normalize_ratios(expected_ratios["production_channel"])
+    expected_ratios["decay_products"] = normalize_ratios(expected_ratios["decay_products"])
+
 
     # Perform chi-square goodness of fit test
     if filter_type == "production_channel":
