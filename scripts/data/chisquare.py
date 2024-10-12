@@ -4,7 +4,7 @@ from scipy.stats import chisquare
 
 def filter_data_by_jet_stats(data):
     print(f"Filtering for Leading Jet (jetID == 0 for either jet in the pair) ...")
-    data[['Jet1', 'Jet2']] = data['jetID'].str.split(';', expand=True).astype(int)
+    data[['Jet1', 'Jet2']] = data['Jet_ID'].str.split(';', expand=True).astype(int)
     
     # Filter for events where either the first or second jet (leading jet) is 0
     data_first_jet = data[data['Jet1'] == 0]
@@ -29,7 +29,7 @@ def get_production_channel_bins(filtered_data):
     return filtered_data['ProductionChannel'].value_counts()
 
 def get_jet_bins(filtered_data):
-    return filtered_data['jetID'].value_counts()
+    return filtered_data['Jet_ID'].value_counts()
 
 # Remove bins with 0 counts in either the observed or expected datasets
 def calculate_chi_square(observed_bins, expected_ratios):
