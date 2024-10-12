@@ -41,6 +41,11 @@ def calculate_chi_square(observed_bins, expected_ratios, filter_value):
         print("No valid bins for chi-square calculation.")
         return
 
+    total_expected = sum(expected_counts)
+    if total_expected > 0:
+        normalization_factor = total_observed / total_expected
+        expected_counts = [count * normalization_factor for count in expected_counts]
+
     # Print sums of observed and expected counts
     print(f"Sum of Observed Frequencies: {sum(observed_counts)}")
     print(f"Sum of Expected Frequencies: {sum(expected_counts)}")
