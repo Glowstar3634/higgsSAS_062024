@@ -86,10 +86,13 @@ def main(observed_file, filter_type, filter_value):
 
     elif filter_type == "jet_stats":
         observed_filtered = filter_data_by_jet_stats(observed_data)
-        if filter_value == 0:
-            observed_bins = get_production_channel_bins(observed_filtered)
-        elif filter_value == 1:
-            observed_bins = get_decay_product_bins(observed_filtered)
+        if filter_value == "0":
+            observed_bins = get_production_channel_bins(observed_filtered)  # Assign bins here for production channel
+        elif filter_value == "1":
+            observed_bins = get_decay_product_bins(observed_filtered)  # Assign bins here for decay products
+        else:
+            print("Invalid filter value for 'jet_stats'. Use 0 for production channel bins, or 1 for decay product bins.")
+            sys.exit(1)
 
     else:
         print("Invalid filter type. Use 'production_channel', 'decay_products', or 'jet_stats'.")
