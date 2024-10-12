@@ -2,6 +2,10 @@ import pandas as pd
 import sys
 from scipy.stats import chisquare
 
+def normalize_ratios(ratios):
+    total = sum(ratios.values())
+    return {key: value / total for key, value in ratios.items()} if total > 0 else ratios
+
 # Load observed data and filter as needed
 def filter_data_by_production_channel(data, channel):
     print(f"Filtering for Production Channel {channel} ...")
@@ -23,17 +27,15 @@ def get_production_channel_bins(filtered_data):
 def calculate_chi_square(observed_bins, expected_ratios, filter_value):
     total_observed = sum(observed_bins)  # Total number of observed events
     print(f"Total Observed: {total_observed}...")
-    print(f"Observed bins: {observed_bins}...")
     
     expected_counts = []
     observed_counts = []
 
     for bin_name, expected_ratio in expected_ratios.items():
         expected_count = expected_ratio * total_observed  # Calculate expected count
-        print(f"Checking bin {bin_name}...")
-        observed_count = observed_bins.get(bin_name, 0)  # If bin is missing in observed, count as 0
+        observed_count = observed_bins.get(bin_name, 0)  # Count as 0 if bin is missing
 
-        if observed_count > 0 and expected_count > 0:  # Filter out 0 values
+        if observed_count > 0 and expected_count > 0:  # Only consider non-zero counts
             observed_counts.append(observed_count)
             expected_counts.append(expected_count)
 
@@ -41,14 +43,18 @@ def calculate_chi_square(observed_bins, expected_ratios, filter_value):
         print("No valid bins for chi-square calculation.")
         return
 
+    # Sum of expected counts before normalization
     total_expected = sum(expected_counts)
+    print(f"Sum of Expected Frequencies (before normalization): {total_expected}")
+
+    # Normalize expected_counts to match total_observed
     if total_expected > 0:
         normalization_factor = total_observed / total_expected
         expected_counts = [count * normalization_factor for count in expected_counts]
 
-    # Print sums of observed and expected counts
+    # Print sums of observed and expected counts after normalization
     print(f"Sum of Observed Frequencies: {sum(observed_counts)}")
-    print(f"Sum of Expected Frequencies: {sum(expected_counts)}")
+    print(f"Sum of Expected Frequencies (after normalization): {sum(expected_counts)}")
 
     # Perform chi-square test
     chi2, p = chisquare(f_obs=observed_counts, f_exp=expected_counts)
@@ -98,6 +104,8 @@ def main(observed_file, filter_type, filter_value):
             "13;-13": 0.00022,
         }
     }
+    expected_ratios["production_channel"] = normalize_ratios(expected_ratios["production_channel"])
+    expected_ratios["decay_products"] = normalize_ratios(expected_ratios["decay_products"])
 
     # Perform chi-square goodness of fit test
     if filter_type == "production_channel":
