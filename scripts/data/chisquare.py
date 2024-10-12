@@ -101,6 +101,7 @@ def main(observed_file, filter_type, filter_value):
             "901": 0.0091,
             "908": 0.0038,
             "909": 0.0019,
+            "903": 0.0001,
         },
         "decay_products": {
             "5;-5": 0.571,
