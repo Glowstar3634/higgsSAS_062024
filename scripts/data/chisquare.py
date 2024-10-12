@@ -27,33 +27,32 @@ def get_production_channel_bins(filtered_data):
 def calculate_chi_square(observed_bins, expected_ratios, filter_value):
     total_observed = sum(observed_bins)  # Total number of observed events
     print(f"Total Observed: {total_observed}...")
-    
+
     expected_counts = []
     observed_counts = []
 
-    for bin_name, expected_ratio in expected_ratios.items():
-        expected_count = expected_ratio * total_observed  # Calculate expected count
+    for bin_name in expected_ratios.keys():
+        expected_count = expected_ratios[bin_name] * total_observed  # Calculate expected count
         observed_count = observed_bins.get(bin_name, 0)  # Count as 0 if bin is missing
 
-        if observed_count > 0 and expected_count > 0:  # Only consider non-zero counts
-            observed_counts.append(observed_count)
-            expected_counts.append(expected_count)
+        observed_counts.append(observed_count)
+        expected_counts.append(expected_count)
 
     if len(observed_counts) == 0:
         print("No valid bins for chi-square calculation.")
         return
 
-    # Sum of expected counts before normalization
-    total_expected = sum(expected_counts)
-    print(f"Sum of Expected Frequencies (before normalization): {total_expected}")
+    # Print sums of observed and expected counts
+    print(f"Sum of Observed Frequencies: {sum(observed_counts)}")
+    print(f"Sum of Expected Frequencies (before normalization): {sum(expected_counts)}")
 
     # Normalize expected_counts to match total_observed
+    total_expected = sum(expected_counts)
     if total_expected > 0:
         normalization_factor = total_observed / total_expected
         expected_counts = [count * normalization_factor for count in expected_counts]
 
-    # Print sums of observed and expected counts after normalization
-    print(f"Sum of Observed Frequencies: {sum(observed_counts)}")
+    # Print sums after normalization
     print(f"Sum of Expected Frequencies (after normalization): {sum(expected_counts)}")
 
     # Perform chi-square test
