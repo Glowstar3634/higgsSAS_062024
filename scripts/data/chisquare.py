@@ -150,7 +150,7 @@ def main(observed_file, filter_type, filter_value):
     }
 
     # Perform chi-square goodness of fit test
-    if filter_type == "production_channel" or filter_type == "jet_stats":
+    if filter_type == "production_channel":
         calculate_chi_square(observed_bins, expected_ratios["decay_products"], filter_value)
         
     elif filter_type == "decay_products":
