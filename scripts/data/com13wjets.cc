@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
     int nEvents = 10000;
     int totalHCount = 0;
 
-    // Write headers to the output file
+    //Outfile headers
     outFile << "ProductionChannel,DecayProducts,InvMasses,Jet_PT,Jet_Eta,Jet_Phi,Jet_Mass,Jet_ID\n";
 
     for (int i = 0; i < nEvents; i++) {
@@ -164,7 +164,7 @@ int main(int argc, char* argv[]) {
 
                                 if (decayIndex != 1) outFile << ";";
                             }
-                            outFile << ","; //next property
+                            outFile << ",";
                         }
 
                         // Output Jet ID for each decay product

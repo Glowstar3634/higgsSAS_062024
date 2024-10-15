@@ -10,7 +10,7 @@ def filter_data_by_jet_stats(data):
     print(f"Filtering for Leading Jet (jetID == 0 for either jet in the pair) ...")
     data[['Jet1', 'Jet2']] = data['Jet_ID'].str.split(';', expand=True).astype(int)
     
-    # Filter for events where either the first or second jet (leading jet) is 0
+    # Filter for events where a decay is associated with leading jet
     data_first_jet = data[data['Jet1'] == 0]
     data_second_jet = data[data['Jet2'] == 0]
     filtered_data = pd.concat([data_first_jet, data_second_jet])
@@ -35,9 +35,8 @@ def get_production_channel_bins(filtered_data):
 def get_jet_bins(filtered_data):
     return filtered_data['Jet_ID'].value_counts()
 
-# Remove bins with 0 counts in either the observed or expected datasets
 def calculate_chi_square(observed_bins, expected_ratios, filter_value):
-    total_observed = sum(observed_bins)  # Total number of observed events
+    total_observed = sum(observed_bins)
     print(f"Total Observed: {total_observed}...")
 
     expected_counts = []
@@ -45,35 +44,27 @@ def calculate_chi_square(observed_bins, expected_ratios, filter_value):
 
     if filter_type == "production_channel":
         for bin_name in expected_ratios.keys():
-            expected_count = expected_ratios[bin_name] * total_observed  # Calculate expected count
-            print(f"checking bin {bin_name}...")
-            observed_count = observed_bins.get(bin_name, 0)  # Count as 0 if bin is missing
-
+            expected_count = expected_ratios[bin_name] * total_observed
+            observed_count = observed_bins.get(bin_name, 0)  # Count as 0 if bin is missing (decay did not occur)
             observed_counts.append(observed_count)
             expected_counts.append(expected_count)
     elif filter_type == "decay_products":
         for bin_name in expected_ratios.keys():
-            expected_count = expected_ratios[bin_name] * total_observed  # Calculate expected count
-            print(f"checking bin {bin_name}...")
-            observed_count = observed_bins.get(int(bin_name), 0)  # Count as 0 if bin is missing
-
+            expected_count = expected_ratios[bin_name] * total_observed
+            observed_count = observed_bins.get(int(bin_name), 0) 
             observed_counts.append(observed_count)
             expected_counts.append(expected_count)
     else:
         if filter_value == "1":
             for bin_name in expected_ratios.keys():
-                expected_count = expected_ratios[bin_name] * total_observed  # Calculate expected count
-                print(f"checking bin {bin_name}...")
-                observed_count = observed_bins.get(bin_name, 0)  # Count as 0 if bin is missing
-
+                expected_count = expected_ratios[bin_name] * total_observed  
+                observed_count = observed_bins.get(bin_name, 0) 
                 observed_counts.append(observed_count)
                 expected_counts.append(expected_count)
         elif filter_value == "0":
             for bin_name in expected_ratios.keys():
-                expected_count = expected_ratios[bin_name] * total_observed  # Calculate expected count
-                print(f"checking bin {bin_name}...")
-                observed_count = observed_bins.get(int(bin_name), 0)  # Count as 0 if bin is missing
-
+                expected_count = expected_ratios[bin_name] * total_observed 
+                observed_count = observed_bins.get(int(bin_name), 0) 
                 observed_counts.append(observed_count)
                 expected_counts.append(expected_count)
 
@@ -81,16 +72,13 @@ def calculate_chi_square(observed_bins, expected_ratios, filter_value):
         print("No valid bins for chi-square calculation.")
         return
 
-    # Sum of expected counts before normalization
     total_expected = sum(expected_counts)
-    print(f"Sum of Expected Frequencies (before normalization): {total_expected}")
 
     # Normalize expected_counts to match total_observed
     if total_expected > 0:
         normalization_factor = total_observed / total_expected
         expected_counts = [count * normalization_factor for count in expected_counts]
 
-    # Print sums of observed and expected counts after normalization
     print(f"Sum of Observed Frequencies: {sum(observed_counts)}")
     print(f"Sum of Expected Frequencies (after normalization): {sum(expected_counts)}")
 
@@ -101,7 +89,6 @@ def calculate_chi_square(observed_bins, expected_ratios, filter_value):
     print(f"P-value: {p}")
 
 def main(observed_file, filter_type, filter_value):
-    # Load observed data
     observed_data = pd.read_csv(observed_file)
     filter_value = str(filter_value) 
 
@@ -117,9 +104,9 @@ def main(observed_file, filter_type, filter_value):
     elif filter_type == "jet_stats":
         observed_filtered = filter_data_by_jet_stats(observed_data)
         if filter_value == "0":
-            observed_bins = get_production_channel_bins(observed_filtered)  # Assign bins here for production channel
+            observed_bins = get_production_channel_bins(observed_filtered)
         elif filter_value == "1":
-            observed_bins = get_decay_product_bins(observed_filtered)  # Assign bins here for decay products
+            observed_bins = get_decay_product_bins(observed_filtered)
         else:
             print("Invalid filter value for 'jet_stats'. Use 0 for production channel bins, or 1 for decay product bins.")
             sys.exit(1)
@@ -128,7 +115,7 @@ def main(observed_file, filter_type, filter_value):
         print("Invalid filter type. Use 'production_channel', 'decay_products', or 'jet_stats'.")
         sys.exit(1)
 
-    # Using the expected_ratios object
+    #Standard Model ratio predictions (to be confirmed)
     expected_ratios = {
         "production_channel": {
             "902": 0.8610,

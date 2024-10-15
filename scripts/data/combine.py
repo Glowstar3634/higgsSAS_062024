@@ -1,6 +1,7 @@
 import pandas as pd
 import sys
 
+#Used to combine data from multiple script runs for the same energy level
 def combine(files, output_file):
     combined_data = pd.DataFrame()
     

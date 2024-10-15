@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import sys
 import os
 
+#Standard Model ratio predictions (to be confirmed)
 expected_ratios = {
     "production_channel": {
         "902": 0.8610,
@@ -128,8 +129,6 @@ def main(input_file, parameter, fixed_value):
     
     data['ProductionChannel'] = data['ProductionChannel'].astype(int)
     data['Jet_ID'] = data['Jet_ID'].apply(lambda x: [int(i) for i in x.split(';')] if pd.notna(x) else [])
-    
-    # Extract file name from the input file
     file_name = os.path.basename(input_file)
     
     if parameter == 'jet_stats':
