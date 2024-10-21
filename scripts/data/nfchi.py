@@ -85,6 +85,9 @@ def calculate_chi_square(observed_bins, expected_ratios, filter_value):
     # Perform chi-square test
     chi2, p = chisquare(f_obs=observed_counts, f_exp=expected_counts)
 
+    print("Observed Bins:", observed_bins)
+    print(f"Observed Counts: {observed_counts}")
+    print(f"Expected Counts: {expected_counts}")
     print(f"Chi-Square Statistic: {chi2}")
     print(f"P-value: {p}")
 
