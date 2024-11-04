@@ -36,17 +36,8 @@ int main(int argc, char* argv[]) {
     pythia.readString("Random:seed = 0");
     pythia.readString("Beams:frameType = 4");
     pythia.readString("Beams:LHEF = '/home/ubuntu/MG5_aMC_v3_6_0/SMEFT_run2/Events/run_01/unweighted_events.lhe'");
-    pythia.readString("Beams:eCM = 100.e3");
-    pythia.readString("HiggsSM:all  = off");
-    pythia.readString("HiggsSM:gg2H = on"); // Enable gg -> H (ggH)
-    pythia.readString("HiggsSM:ff2Hff(t:ZZ) = on"); // Enable VBF (VBF: quark initiated)
-    pythia.readString("HiggsSM:ff2Hff(t:W+W-) = on"); // Enable VBF (quark initiated)
-    pythia.readString("HiggsSM:ffbar2Hffbar(t:ZZ) = on"); // Enable VH production (associated with Z)
-    pythia.readString("HiggsSM:ffbar2Hffbar(t:W+W-) = on"); // Enable VH production (associated with W)
-    pythia.readString("HiggsSM:qqbar2Httbar = on"); // Enable ttH production
-    pythia.readString("25:onMode = on");
-
-    //SMEFT Parameters
+    pythia.readString("Beams:eCM = 100.e3"); // Adjust as needed
+    pythia.readString("25:onMode = on"); // Enable Higgs decay modes
 
     pythia.init();
 
