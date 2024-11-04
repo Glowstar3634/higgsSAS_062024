@@ -30,13 +30,13 @@ int main(int argc, char* argv[]) {
     }
 
 
-    // Initialize Pythia with proton-proton collisions at 100 TeV + enabled main Higgs processes
+    // Initialize Pythia with MadGraph LHE file
     Pythia pythia;
     pythia.readString("Random:setSeed = on");
     pythia.readString("Random:seed = 0");
-    pythia.readString("Beams:idA = 2212");
-    pythia.readString("Beams:idB = 2212");
-    pythia.readString("Beams:eCM = 100.e3");
+    pythia.readString("Beams:frameType = 4");
+    pythia.readString("Beams:LHEF = 'path_to_lhe_file.lhe'");
+    //pythia.readString("Beams:eCM = 100.e3");
     pythia.readString("HiggsSM:all  = off");
     pythia.readString("HiggsSM:gg2H = on"); // Enable gg -> H (ggH)
     pythia.readString("HiggsSM:ff2Hff(t:ZZ) = on"); // Enable VBF (VBF: quark initiated)
@@ -56,11 +56,10 @@ int main(int argc, char* argv[]) {
     double R = 0.4;
     JetDefinition jet_def(antikt_algorithm, R);
 
-    int nEvents = 25000;
+    int nEvents = 10000;
     int totalHCount = 0;
 
     //Outfile headers
-    outFile << "SMEFT_Lambda=1000,SMEFT_cHq3=0.5,SMEFT_cHW=0.05\n";
     outFile << "ProductionChannel,DecayProducts,InvMasses\n";
 
     for (int i = 0; i < nEvents; i++) {
