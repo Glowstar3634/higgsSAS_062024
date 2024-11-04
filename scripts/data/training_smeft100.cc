@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
     pythia.readString("Random:setSeed = on");
     pythia.readString("Random:seed = 0");
     pythia.readString("Beams:frameType = 4");
-    pythia.readString("Beams:LHEF = 'unweighted_events.lhe'");
+    pythia.readString("Beams:LHEF = 'unweighted_events'");
     pythia.readString("Beams:eCM = 100.e3"); // Adjust as needed
     pythia.readString("25:onMode = on"); // Enable Higgs decay modes
 
