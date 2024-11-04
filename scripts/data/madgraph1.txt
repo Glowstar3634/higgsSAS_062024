@@ -1,18 +1,17 @@
-# Set model to include SMEFT (assuming SMEFT model files are installed in MadGraph)
 import model SMEFTsim_U35_MwScheme_UFO
-
-# SMEFT parameters
-set smeft 0.5 
-
-# Specify run settings
-output SMEFT_run
 
 # Specify process
 generate p p > h
+
+# Specify run settings
+output SMEFT_run2
 
 # Customize run parameters
 shower=OFF
 decay=ALL
 
 # Launching
-launch SMEFT_run
+launch SMEFT_run2
+
+shower=Pythia8
+launch
