@@ -19,23 +19,28 @@ double invariantMass(const std::vector<Vec4>& momenta) {
 }
 
 int main(int argc, char* argv[]) {
-    if (argc != 2) {
-        std::cerr << "Usage: " << argv[0] << " <output_file>" << std::endl;
+    if (argc != 3) {
+        std::cerr << "Usage: " << argv[0] << " <LHE_file> <output_file>" << std::endl;
         return 1;
     }
-    std::ofstream outFile(argv[1]);
-    if (!outFile.is_open()) {
-        std::cerr << "Error: Could not open file for writing: " << argv[1] << std::endl;
+    std::ifstream inFile(argv[1]);
+    if (!inFile.is_open()) {
+        std::cerr << "Error: Could not open LHE file: " << argv[1] << std::endl;
         return 1;
     }
 
+    std::ofstream outFile(argv[2]);
+    if (!outFile.is_open()) {
+        std::cerr << "Error: Could not open file for writing: " << argv[2] << std::endl;
+        return 1;
+    }
 
     // Initialize Pythia with MadGraph LHE file
     Pythia pythia;
     pythia.readString("Random:setSeed = on");
     pythia.readString("Random:seed = 0");
     pythia.readString("Beams:frameType = 4");
-    pythia.readString("Beams:LHEF = 'unweighted_events'");
+    pythia.readString("Beams:LHEF = '" + std::string(argv[1]) + "'");
     pythia.readString("Beams:eCM = 100.e3"); // Adjust as needed
     pythia.readString("25:onMode = on"); // Enable Higgs decay modes
 
@@ -83,13 +88,11 @@ int main(int argc, char* argv[]) {
                 // Store decay products and their momenta
                 std::vector<int> decayProducts;
                 std::vector<Vec4> momenta;
-                std::map<int, int> particleIdToIndexMap;
 
                 for (int k = 0; k < pythia.event.size(); k++) {
                     if (pythia.event[k].mother1() == j || pythia.event[k].mother2() == j) {
                         decayProducts.push_back(pythia.event[k].id());
                         momenta.push_back(pythia.event[k].p());
-                        particleIdToIndexMap[pythia.event[k].id()] = k;
                     }
                 }
 
@@ -109,7 +112,6 @@ int main(int argc, char* argv[]) {
             }
         }
     }
-
 
     //Finished
     outFile.close();
