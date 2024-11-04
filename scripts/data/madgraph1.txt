@@ -1,9 +1,3 @@
-# Launch MadGraph
-launch
-
-# Specify process
-generate p p > h
-
 # Set model to include SMEFT (assuming SMEFT model files are installed in MadGraph)
 import model SMEFTsim_U35_MwScheme_UFO
 
@@ -13,6 +7,12 @@ set smeft 0.5
 # Specify run settings
 output SMEFT_run
 
+# Specify process
+generate p p > h
+
 # Customize run parameters
-launch SMEFT_run shower=OFF
+shower=OFF
 decay=ALL
+
+# Launching
+launch SMEFT_run
