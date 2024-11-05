@@ -38,7 +38,7 @@ app.get('/generate', (req, res) => {
                 console.log(`Unzip process exited with code ${unzipCode}`);
                 if (unzipCode === 0) {
                     // Step 3: Run Pythia script on the generated LHE file
-                    const pythiaChild = spawn('bash', ['/home/ubuntu/pythia8312/scripts/pgen7.02', outputLHE, pythiaOutput]);
+                    const pythiaChild = spawn('/home/ubuntu/pythia8312/scripts/pgen7.02', [outputLHE, pythiaOutput]);
 
                     pythiaChild.stdout.on('data', (data) => {
                         console.log(`Pythia stdout: ${data}`);
