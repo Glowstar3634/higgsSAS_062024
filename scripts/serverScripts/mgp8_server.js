@@ -12,7 +12,7 @@ app.get('/generate', (req, res) => {
     const outputLHE = '/home/ubuntu/MG5_aMC_v3_6_0/SMEFT_run3/Events/run_01/unweighted_events.lhe'; // Update this path for unzipped LHE
     const pythiaOutput = '/home/ubuntu/pythia8312/scripts/particleData7_02.csv'; // Update this path
 
-    const madGraphChild = spawn('bash', [madGraphCommand]);
+    const madGraphChild = spawn('bash', ['-c', 'cd /home/ubuntu/MG5_aMC_v3_6_0 && ./bin/mg5_aMC /home/ubuntu/MG5_aMC_v3_6_0/scripts/madgraph1.txt']);
 
     madGraphChild.stdout.on('data', (data) => {
         console.log(`MadGraph stdout: ${data}`);
