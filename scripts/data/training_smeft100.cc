@@ -36,11 +36,13 @@ int main(int argc, char* argv[]) {
     }
 
     // Initialize Pythia with MadGraph LHE file
+    
     Pythia pythia;
+    std::cout << std::string(argv[1]) << std::endl;
     pythia.readString("Random:setSeed = on");
     pythia.readString("Random:seed = 0");
     pythia.readString("Beams:frameType = 4");
-    pythia.readString("Beams:LHEF = '" + std::string(argv[1]) + "'");
+    pythia.readString("Beams:LHEF = " + std::string(argv[1]));
     pythia.readString("Beams:eCM = 100.e3"); // Adjust as needed
     pythia.readString("25:onMode = on"); // Enable Higgs decay modes
 
