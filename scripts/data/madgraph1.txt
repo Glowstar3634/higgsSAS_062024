@@ -12,3 +12,4 @@ decay=ALL
 
 # Launching
 launch SMEFT_run3
+quit

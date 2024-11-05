@@ -7,7 +7,7 @@ const port = 8080;
 
 app.get('/generate', (req, res) => {
     // Step 1: Generate LHE file with MadGraph
-    const madGraphCommand = '/home/ubuntu/MG5_aMC_v3_6_0/scripts/madgraph1.txt'; // Update this path
+    const madGraphCommand = './bin/mg5_aMC /home/ubuntu/MG5_aMC_v3_6_0/scripts/madgraph1.txt'; // Update this path
     const outputZip = '/home/ubuntu/MG5_aMC_v3_6_0/SMEFT_run3/Events/run_01/unweighted_events.lhe.gz'; // Update this path
     const outputLHE = '/home/ubuntu/MG5_aMC_v3_6_0/SMEFT_run3/Events/run_01/unweighted_events.lhe'; // Update this path for unzipped LHE
     const pythiaOutput = '/home/ubuntu/pythia8312/scripts/particleData7_02.csv'; // Update this path
