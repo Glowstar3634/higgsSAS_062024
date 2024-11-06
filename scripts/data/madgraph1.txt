@@ -1,15 +1,12 @@
+#Generate data
 import model SMEFTsim_U35_MwScheme_UFO
-
-# Specify process
 generate p p > h
 
-# Specify run settings
 output SMEFT_run3
 
 # Customize run parameters
 shower=OFF
 decay=ALL
 
-# Launching
 launch SMEFT_run3
 quit
