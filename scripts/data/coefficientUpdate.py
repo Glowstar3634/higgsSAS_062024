@@ -41,7 +41,8 @@ def update_run_card(file_path, nevents, ebeam):
             # Update the center-of-mass energy (ebeam1 and ebeam2)
             elif line.strip().startswith('6500.0     = ebeam1'):
                 line = f"     {ebeam} = ebeam1  ! beam 1 total energy in GeV\n"
-                lines[lines.index(line) + 1] = f"     {ebeam} = ebeam2  ! beam 2 total energy in GeV\n"
+            elif line.strip().startswith('6500.0     = ebeam2'):
+                line = f"     {ebeam} = ebeam2  ! beam 2 total energy in GeV\n"
                 
             file.write(line)
 
