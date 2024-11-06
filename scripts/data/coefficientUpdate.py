@@ -36,5 +36,5 @@ def save_coefficients(file_path, new_coefficients):
 
 #Generate Wilsons and update the parameter file
 new_coefficients = generate_random_coefficients()
-update_wilson_coefficients('param_card.dat', new_coefficients)
+update_wilson_coefficients('/home/ubuntu/MG5_aMC_v3_6_0/SMEFT_run3/Cards/param_card.dat', new_coefficients)
 save_coefficients('wilson_coefficients.json', new_coefficients)

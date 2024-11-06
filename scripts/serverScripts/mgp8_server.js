@@ -29,7 +29,7 @@ app.get('/generate', (req, res) => {
         console.log(`Starting iteration ${iteration}`);
 
         //Generate random Wilson coefficients
-        const updateCoefficientsChild = spawn('python3', ['coefficientUpdate.py']);
+        const updateCoefficientsChild = spawn('python3', ['/home/ubuntu/MG5_aMC_v3_6_0/SMEFT_run3/Cards/coefficientUpdate.py']);
 
         updateCoefficientsChild.stdout.on('data', (data) => {
             console.log(`Coefficient update stdout: ${data}`);
