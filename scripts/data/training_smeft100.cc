@@ -23,6 +23,7 @@ int identifyProductionChannel(const std::vector<int>& incomingPartonIDs) {
 
     int id1 = std::abs(incomingPartonIDs[0]);
     int id2 = std::abs(incomingPartonIDs[1]);
+    std::cout << "id1: " << id1 << ", id2: " << id2 << std::endl;
 
     // ggH (Gluon-Gluon Fusion)
     if (id1 == 21 && id2 == 21) {
