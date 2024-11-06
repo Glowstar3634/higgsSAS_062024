@@ -68,6 +68,7 @@ int main(int argc, char* argv[]) {
             if ((pythia.event[j].id() == 25 || pythia.event[j].id() == 35 || pythia.event[j].id() == 36 || pythia.event[j].id() == 37) && pythia.event[j].status() == -62) {
                 totalHCount++;
                 int id1 = pythia.event[pythia.event[j].mother1()].id();
+                console.log("Mother is " + id1);
                 int id2 = pythia.event[pythia.event[j].mother2()].id();
 
                 // Infer production channel from incoming partons
