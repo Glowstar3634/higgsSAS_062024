@@ -28,120 +28,145 @@ app.get('/generate', (req, res) => {
 
         console.log(`Starting iteration ${iteration}`);
 
-        //Generate random Wilson coefficients
-        const updateCoefficientsChild = spawn('python3', ['/home/ubuntu/pythia8312/scripts/coefficientUpdate.py']);
-
-        updateCoefficientsChild.stdout.on('data', (data) => {
-            console.log(`Coefficient update stdout: ${data}`);
+        // Step 1: Run MadGraph1 script
+        const madGraphChild1 = spawn('bash', ['-c', 'cd /home/ubuntu/MG5_aMC_v3_6_0 && ./bin/mg5_aMC /home/ubuntu/MG5_aMC_v3_6_0/scripts/madgraph1.txt']);
+        
+        madGraphChild1.stdout.on('data', (data) => {
+            console.log(`MadGraph1 stdout: ${data}`);
         });
 
-        updateCoefficientsChild.stderr.on('data', (data) => {
-            console.error(`Coefficient update stderr: ${data}`);
+        madGraphChild1.stderr.on('data', (data) => {
+            console.error(`MadGraph1 stderr: ${data}`);
         });
 
-        updateCoefficientsChild.on('error', (error) => {
-            console.error(`Coefficient update exec error: ${error}`);
+        madGraphChild1.on('error', (error) => {
+            console.error(`MadGraph1 exec error: ${error}`);
             res.status(500).send(`Error: ${error.message}`);
         });
 
-        updateCoefficientsChild.on('close', (code) => {
-            console.log(`Coefficient update process exited with code ${code}`);
+        madGraphChild1.on('close', (code) => {
+            console.log(`MadGraph1 process exited with code ${code}`);
             if (code === 0) {
-                //Generate LHE file with MadGraph
-                const outputZip = '/home/ubuntu/MG5_aMC_v3_6_0/SMEFT_run3/Events/run_01/unweighted_events.lhe.gz';
-                const outputLHE = '/home/ubuntu/MG5_aMC_v3_6_0/SMEFT_run3/Events/run_01/unweighted_events.lhe';
-                const pythiaOutput = '/home/ubuntu/pythia8312/scripts/particleData7_02.csv';
+                // Step 2: Update Coefficients with Python script
+                const updateCoefficientsChild = spawn('python3', ['/home/ubuntu/pythia8312/scripts/coefficientUpdate.py']);
 
-                const madGraphChild = spawn('bash', ['-c', 'cd /home/ubuntu/MG5_aMC_v3_6_0 && ./bin/mg5_aMC /home/ubuntu/MG5_aMC_v3_6_0/scripts/madgraph1.txt']);//Set of commands that initialize the event generation
-
-                madGraphChild.stdout.on('data', (data) => {
-                    console.log(`MadGraph stdout: ${data}`);
+                updateCoefficientsChild.stdout.on('data', (data) => {
+                    console.log(`Coefficient update stdout: ${data}`);
                 });
 
-                madGraphChild.stderr.on('data', (data) => {
-                    console.error(`MadGraph stderr: ${data}`);
+                updateCoefficientsChild.stderr.on('data', (data) => {
+                    console.error(`Coefficient update stderr: ${data}`);
                 });
 
-                madGraphChild.on('error', (error) => {
-                    console.error(`MadGraph exec error: ${error}`);
+                updateCoefficientsChild.on('error', (error) => {
+                    console.error(`Coefficient update exec error: ${error}`);
                     res.status(500).send(`Error: ${error.message}`);
                 });
 
-                madGraphChild.on('close', (code) => {
-                    console.log(`MadGraph process exited with code ${code}`);
+                updateCoefficientsChild.on('close', (code) => {
+                    console.log(`Coefficient update process exited with code ${code}`);
                     if (code === 0) {
-                        const unzipCommand = `gunzip ${outputZip}`;
-                        const unzipChild = spawn('bash', ['-c', unzipCommand]);
+                        // Step 3: Run MadGraph2 script
+                        const madGraphChild2 = spawn('bash', ['-c', 'cd /home/ubuntu/MG5_aMC_v3_6_0 && ./bin/mg5_aMC /home/ubuntu/MG5_aMC_v3_6_0/scripts/madgraph2.txt']);
 
-                        unzipChild.on('close', (unzipCode) => {
-                            console.log(`Unzip process exited with code ${unzipCode}`);
-                            if (unzipCode === 0) {
-                                //Run Pythia script on the generated LHE file for showering
-                                const pythiaChild = spawn('/home/ubuntu/pythia8312/scripts/pgen7.02', [outputLHE, pythiaOutput]);
+                        madGraphChild2.stdout.on('data', (data) => {
+                            console.log(`MadGraph2 stdout: ${data}`);
+                        });
 
-                                pythiaChild.stdout.on('data', (data) => {
-                                    console.log(`Pythia stdout: ${data}`);
-                                });
+                        madGraphChild2.stderr.on('data', (data) => {
+                            console.error(`MadGraph2 stderr: ${data}`);
+                        });
 
-                                pythiaChild.stderr.on('data', (data) => {
-                                    console.error(`Pythia stderr: ${data}`);
-                                });
+                        madGraphChild2.on('error', (error) => {
+                            console.error(`MadGraph2 exec error: ${error}`);
+                            res.status(500).send(`Error: ${error.message}`);
+                        });
 
-                                pythiaChild.on('error', (error) => {
-                                    console.error(`Pythia exec error: ${error}`);
-                                    res.status(500).send(`Error: ${error.message}`);
-                                });
+                        madGraphChild2.on('close', (code) => {
+                            console.log(`MadGraph2 process exited with code ${code}`);
+                            if (code === 0) {
+                                // Step 4: Unzip the generated LHE file
+                                const outputZip = '/home/ubuntu/MG5_aMC_v3_6_0/SMEFT_run3/Events/run_01/unweighted_events.lhe.gz';
+                                const outputLHE = '/home/ubuntu/MG5_aMC_v3_6_0/SMEFT_run3/Events/run_01/unweighted_events.lhe';
+                                const unzipCommand = `gunzip ${outputZip}`;
+                                const unzipChild = spawn('bash', ['-c', unzipCommand]);
 
-                                pythiaChild.on('close', (pythiaCode) => {
-                                    console.log(`Pythia process exited with code ${pythiaCode}`);
-                                    if (pythiaCode === 0) {
-                                        // Load Wilson coefficients
-                                        loadWilsonCoefficients((err, wilsonCoefficients) => {
-                                            if (err) {
-                                                return res.status(500).send(`Error loading Wilson coefficients: ${err.message}`);
-                                            }
+                                unzipChild.on('close', (unzipCode) => {
+                                    console.log(`Unzip process exited with code ${unzipCode}`);
+                                    if (unzipCode === 0) {
+                                        // Step 5: Run Pythia script for showering
+                                        const pythiaOutput = '/home/ubuntu/pythia8312/scripts/particleData7_02.csv';
+                                        const pythiaChild = spawn('/home/ubuntu/pythia8312/scripts/pgen7.02', [outputLHE, pythiaOutput]);
 
-                                            fs.readFile(pythiaOutput, 'utf8', (err, data) => {
-                                                if (err) {
-                                                    console.error('Error reading Pythia output CSV:', err);
-                                                    return res.status(500).send(`Error: ${err.message}`);
-                                                }
-                                                const wilsonString = `# Wilson Coefficients: ${Object.entries(wilsonCoefficients).map(([key, value]) => `${key}: ${value}`).join(', ')}\n`;
-                                                const newCsvData = wilsonString + data;
-                                                const finalOutput = path.join('/home/ubuntu/pythia8312/scripts/', `particleData7_02_with_coeffs.csv`);
-                                                fs.writeFile(finalOutput, newCsvData, (err) => {
+                                        pythiaChild.stdout.on('data', (data) => {
+                                            console.log(`Pythia stdout: ${data}`);
+                                        });
+
+                                        pythiaChild.stderr.on('data', (data) => {
+                                            console.error(`Pythia stderr: ${data}`);
+                                        });
+
+                                        pythiaChild.on('error', (error) => {
+                                            console.error(`Pythia exec error: ${error}`);
+                                            res.status(500).send(`Error: ${error.message}`);
+                                        });
+
+                                        pythiaChild.on('close', (pythiaCode) => {
+                                            console.log(`Pythia process exited with code ${pythiaCode}`);
+                                            if (pythiaCode === 0) {
+                                                // Step 6: Load Wilson coefficients and append to the Pythia output
+                                                loadWilsonCoefficients((err, wilsonCoefficients) => {
                                                     if (err) {
-                                                        console.error('Error writing updated CSV file:', err);
-                                                        return res.status(500).send(`Error: ${err.message}`);
+                                                        return res.status(500).send(`Error loading Wilson coefficients: ${err.message}`);
                                                     }
 
-                                                    //Send file
-                                                    res.sendFile(finalOutput, () => {
-                                                        console.log(`Sent dataset for iteration ${iteration}`);
-                                                        runGenerationLoop(iteration + 1); // Proceed to the next iteration
+                                                    fs.readFile(pythiaOutput, 'utf8', (err, data) => {
+                                                        if (err) {
+                                                            console.error('Error reading Pythia output CSV:', err);
+                                                            return res.status(500).send(`Error: ${err.message}`);
+                                                        }
+
+                                                        const wilsonString = `# Wilson Coefficients: ${Object.entries(wilsonCoefficients).map(([key, value]) => `${key}: ${value}`).join(', ')}\n`;
+                                                        const newCsvData = wilsonString + data;
+                                                        const finalOutput = path.join('/home/ubuntu/pythia8312/scripts/', `particleData7_02_with_coeffs.csv`);
+
+                                                        fs.writeFile(finalOutput, newCsvData, (err) => {
+                                                            if (err) {
+                                                                console.error('Error writing updated CSV file:', err);
+                                                                return res.status(500).send(`Error: ${err.message}`);
+                                                            }
+
+                                                            // Send file
+                                                            res.sendFile(finalOutput, () => {
+                                                                console.log(`Sent dataset for iteration ${iteration}`);
+                                                                runGenerationLoop(iteration + 1); // Proceed to the next iteration
+                                                            });
+                                                        });
                                                     });
                                                 });
-                                            });
+                                            } else {
+                                                res.status(500).send(`Pythia process failed with exit code ${pythiaCode}`);
+                                            }
                                         });
                                     } else {
-                                        res.status(500).send(`Pythia process failed with exit code ${pythiaCode}`);
+                                        res.status(500).send(`Unzip process failed with exit code ${unzipCode}`);
                                     }
                                 });
                             } else {
-                                res.status(500).send(`Unzip process failed with exit code ${unzipCode}`);
+                                res.status(500).send(`MadGraph2 process failed with exit code ${code}`);
                             }
                         });
                     } else {
-                        res.status(500).send(`MadGraph process failed with exit code ${code}`);
+                        res.status(500).send(`Coefficient update process failed with exit code ${code}`);
                     }
                 });
             } else {
-                res.status(500).send(`Coefficient update process failed with exit code ${code}`);
+                res.status(500).send(`MadGraph1 process failed with exit code ${code}`);
             }
         });
     };
 
-    //Begin looping on iteration 1
+    // Begin looping on iteration 1
     runGenerationLoop(1);
 });
 
