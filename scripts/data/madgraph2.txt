@@ -1,0 +1,6 @@
+# Customize run parameters
+shower=OFF
+decay=ALL
+
+launch SMEFT_run3
+quit
