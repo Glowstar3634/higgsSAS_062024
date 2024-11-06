@@ -100,15 +100,16 @@ int main(int argc, char* argv[]) {
 
                     std::vector<Particle> particles;
                     for (int k = 0; k < pythia.event.size(); k++) {
-                        // Add final state particles
-                        if (pythia.event[k].isFinal() && pythia.event[k].pT() > 0.0) {
-                            particles.push_back(pythia.event[k]);
+                        if (pythia.event[k].isFinal()) {
+                            PseudoJet particle(pythia.event[k].px(), pythia.event[k].py(), pythia.event[k].pz(), pythia.event[k].e());
+                            particle.set_user_index(k);
+                            particles.push_back(particle);
                         }
                     }
 
                     // FastJet clustering
                     ClusterSequence clustSeq(particles, jet_def);
-                    std::vector<PseudoJet> jets = clustSeq.inclusiveJets();
+                    std::vector<PseudoJet> jets = clustSeq.inclusive_jets();
                     int jetMultiplicity = 0;
                     for (const auto& jet : jets) {
                         if (jet.pt() > 30.0) {
