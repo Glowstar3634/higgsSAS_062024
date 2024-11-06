@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
                     double pT = pythia.event[j].pT();
                     double rapidity = pythia.event[j].y();
 
-                    std::vector<Particle> particles;
+                    std::vector<PseudoJet> particles;
                     for (int k = 0; k < pythia.event.size(); k++) {
                         if (pythia.event[k].isFinal()) {
                             PseudoJet particle(pythia.event[k].px(), pythia.event[k].py(), pythia.event[k].pz(), pythia.event[k].e());
