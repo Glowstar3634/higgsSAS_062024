@@ -119,27 +119,30 @@ app.get('/generate', (req, res) => {
                                                     if (err) {
                                                         return res.status(500).send(`Error loading Wilson coefficients: ${err.message}`);
                                                     }
-
+                                        
                                                     fs.readFile(pythiaOutput, 'utf8', (err, data) => {
                                                         if (err) {
                                                             console.error('Error reading Pythia output CSV:', err);
                                                             return res.status(500).send(`Error: ${err.message}`);
                                                         }
-
+                                        
                                                         const wilsonString = `# Wilson Coefficients: ${Object.entries(wilsonCoefficients).map(([key, value]) => `${key}: ${value}`).join(', ')}\n`;
                                                         const newCsvData = wilsonString + data;
                                                         const finalOutput = path.join('/home/ubuntu/pythia8312/scripts/', `particleData7_02_with_coeffs.csv`);
-
+                                        
                                                         fs.writeFile(finalOutput, newCsvData, (err) => {
                                                             if (err) {
                                                                 console.error('Error writing updated CSV file:', err);
                                                                 return res.status(500).send(`Error: ${err.message}`);
                                                             }
-
+                                        
                                                             // Send file
                                                             res.sendFile(finalOutput, () => {
                                                                 console.log(`Sent dataset for iteration ${iteration}`);
-                                                                runGenerationLoop(iteration + 1); // Proceed to the next iteration
+                                                                console.log(`Proceeding to iteration ${iteration + 1}`); // Debugging log
+                                                                setTimeout(() => {
+                                                                    runGenerationLoop(iteration + 1); // Proceed to the next iteration
+                                                                }, 5000); // Delay for 5 seconds to ensure previous iteration has completed                                                                
                                                             });
                                                         });
                                                     });
@@ -148,6 +151,7 @@ app.get('/generate', (req, res) => {
                                                 res.status(500).send(`Pythia process failed with exit code ${pythiaCode}`);
                                             }
                                         });
+                                        
                                     } else {
                                         res.status(500).send(`Unzip process failed with exit code ${unzipCode}`);
                                     }
@@ -166,7 +170,6 @@ app.get('/generate', (req, res) => {
         });
     };
 
-    // Begin looping on iteration 1
     runGenerationLoop(1);
 });
 
