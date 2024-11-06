@@ -1,4 +1,5 @@
 import random
+import json
 
 def generate_random_coefficients(num_coefficients=9, min_value=-10, max_value=10):
     return {i + 1: random.uniform(min_value, max_value) for i in range(num_coefficients)}
