@@ -72,7 +72,7 @@ def train_on_files(training_dataset, model_path="smeft_model.h5"):
     print(data.head())
     
     X = preprocess_features(data)
-    y = np.tile(wilson_coefficients, (X.shape[0], 1)).astype(np.float32)
+    y = np.tile(wilson_coefficients, (1, 1)).astype(np.float32)
 
     model.fit(X, y, epochs=50, batch_size=32, validation_split=0.2, verbose=1)
     model.save(model_path)
