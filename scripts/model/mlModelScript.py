@@ -52,6 +52,7 @@ def train_on_files(training_dataset, model_path="smeft_model.h5"):
     if os.path.exists(model_path):
         print("Loading existing model...")
         model = load_model(model_path, custom_objects={'mse': mean_squared_error})
+        model.compile(optimizer='adam', loss='mse', metrics=['mae'])
     else:
         print("Creating a new model...")
         model = Sequential([
