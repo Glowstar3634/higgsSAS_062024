@@ -45,7 +45,7 @@ def preprocess_features(data):
     return X
 
 def train_on_files(training_dataset, model_path="smeft_model.h5"):
-    data = load_dataset(training_dataset)
+    data = load_dataset(training_dataset, header=None)
     
     # Check if model exists; if not, create a new one
     if os.path.exists(model_path):
