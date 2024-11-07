@@ -45,10 +45,10 @@ def train_on_files(training_dataset, model_path="smeft_model.h5"):
         model.compile(optimizer='adam', loss='mse', metrics=['mae'])
 
     
-    print(f"Training on {filename}")
+    print(f"Training on {training_dataset}")
 
     wilson_coefficients = load_wilson_coefficients(data)
-    data = pd.read_csv(filename, skiprows=1, header=1)
+    data = pd.read_csv(training_dataset, skiprows=1, header=1)
     print(data.head())
     
     X = data[['HiggsBoson', 'DecayProducts', 'InvMasses', 'pT', 'Rapidity', 'JetMultiplicity']].values
@@ -56,7 +56,7 @@ def train_on_files(training_dataset, model_path="smeft_model.h5"):
 
     model.fit(X, y, epochs=50, batch_size=32, validation_split=0.2, verbose=1)
     model.save(model_path)
-    print(f"Model saved after training on {filename}")
+    print(f"Model saved after training on {training_dataset}")
 
 def main(training_dataset, model_path):
     train_on_files(training_dataset, model_path)
