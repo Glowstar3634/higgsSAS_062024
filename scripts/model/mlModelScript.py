@@ -53,8 +53,8 @@ def train_on_files(training_dataset, model_path="smeft_model.h5"):
     data = pd.read_csv(training_dataset, skiprows=1)
     print(data.head())
     
-    X = data[['HiggsBoson', ' DecayProducts', ' InvMasses', ' pT', ' Rapidity', ' JetMultiplicity']].values
-    y = np.tile(wilson_coefficients, (X.shape[0], 1))
+    X = data[['HiggsBoson', ' DecayProducts', ' InvMasses', ' pT', ' Rapidity', ' JetMultiplicity']].values.astype(np.float32)
+    y = np.tile(wilson_coefficients, (X.shape[0], 1)).astype(np.float32)
 
     model.fit(X, y, epochs=50, batch_size=32, validation_split=0.2, verbose=1)
     model.save(model_path)
