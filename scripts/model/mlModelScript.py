@@ -51,7 +51,7 @@ def train_on_files(training_dataset, model_path="smeft_model.h5"):
     data = pd.read_csv(training_dataset, skiprows=1)
     print(data.head())
     
-    X = data[['HiggsBoson', 'DecayProducts', 'InvMasses', 'pT', 'Rapidity', 'JetMultiplicity']].values
+    X = data[['HiggsBoson', ' DecayProducts', ' InvMasses', ' pT', ' Rapidity', ' JetMultiplicity']].values
     y = wilson_coefficients
 
     model.fit(X, y, epochs=50, batch_size=32, validation_split=0.2, verbose=1)
