@@ -48,7 +48,7 @@ def train_on_files(training_dataset, model_path="smeft_model.h5"):
     print(f"Training on {training_dataset}")
 
     wilson_coefficients = load_wilson_coefficients(data)
-    data = pd.read_csv(training_dataset, header=0)
+    data = pd.read_csv(training_dataset, skiprows=1)
     print(data.head())
     
     X = data[['HiggsBoson', 'DecayProducts', 'InvMasses', 'pT', 'Rapidity', 'JetMultiplicity']].values
