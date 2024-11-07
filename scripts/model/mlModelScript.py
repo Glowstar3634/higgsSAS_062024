@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.layers import Dense
+from keras.losses import mean_squared_error
 import pandas as pd
 import numpy as np
 import glob
@@ -50,7 +51,7 @@ def train_on_files(training_dataset, model_path="smeft_model.h5"):
     # Check if model exists; if not, create a new one
     if os.path.exists(model_path):
         print("Loading existing model...")
-        model = load_model(model_path)
+        model = load_model(model_path, custom_objects={'mse': mean_squared_error})
     else:
         print("Creating a new model...")
         model = Sequential([
