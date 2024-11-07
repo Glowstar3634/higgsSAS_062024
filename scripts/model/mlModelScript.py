@@ -52,7 +52,7 @@ def train_on_files(training_dataset, model_path="smeft_model.h5"):
     else:
         print("Creating a new model...")
         model = Sequential([
-            Dense(64, activation='relu', input_shape=(6,)),  # 6 input features
+            Dense(64, activation='relu', input_shape=(7,)),
             Dense(128, activation='relu'),
             Dense(64, activation='relu'),
             Dense(9)  # 9 outputs for the Wilson coefficients
