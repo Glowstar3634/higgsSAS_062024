@@ -28,6 +28,20 @@ def load_wilson_coefficients(data):
     
     return coefficients
 
+def preprocess_features(data):
+    # Split DecayProducts into two columns and convert them to floats
+    decay_products_split = data[' DecayProducts'].str.split(';', expand=True)
+    data['DecayProduct1'] = decay_products_split[0].astype(np.float32)
+    data['DecayProduct2'] = decay_products_split[1].astype(np.float32)
+    
+    # Select the columns, replacing DecayProducts with the two new columns
+    features = data[['HiggsBoson', 'DecayProduct1', 'DecayProduct2', ' InvMasses', ' pT', ' Rapidity', ' JetMultiplicity']]
+    
+    # Convert to float32 for compatibility with TensorFlow
+    X = np.asarray(features).astype(np.float32)
+    
+    return X
+
 def train_on_files(training_dataset, model_path="smeft_model.h5"):
     data = load_dataset(training_dataset)
     
@@ -53,7 +67,7 @@ def train_on_files(training_dataset, model_path="smeft_model.h5"):
     data = pd.read_csv(training_dataset, skiprows=1)
     print(data.head())
     
-    X = data[['HiggsBoson', ' DecayProducts', ' InvMasses', ' pT', ' Rapidity', ' JetMultiplicity']].values.astype(np.float32)
+    X = preprocess_features(data)
     y = np.tile(wilson_coefficients, (X.shape[0], 1)).astype(np.float32)
 
     model.fit(X, y, epochs=50, batch_size=32, validation_split=0.2, verbose=1)
