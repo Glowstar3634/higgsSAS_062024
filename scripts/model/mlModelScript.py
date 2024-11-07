@@ -19,6 +19,7 @@ def load_wilson_coefficients(data):
     
     # Concatenate all columns in the first row to form a single string
     comment_string = " ".join(comment_row.astype(str).values)
+    print("Comment string:", comment_string)
     
     # Use regex to extract all Wilson coefficients
     match = re.findall(r'(\d):\s*(-?\d+\.\d+)', comment_string)
@@ -26,7 +27,7 @@ def load_wilson_coefficients(data):
     # Create a list of coefficients in order
     coefficients = [float(coeff[1]) for coeff in sorted(match, key=lambda x: int(x[0]))]
     print("NUM WILSONS: ", len(coefficients))
-    
+
     return coefficients
 
 def preprocess_features(data):
