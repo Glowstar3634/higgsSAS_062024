@@ -10,7 +10,7 @@ import re
 
 def load_dataset(file_path):
     """Load a single CSV file as a DataFrame."""
-    return pd.read_csv(file_path)
+    return pd.read_csv(file_path, header=None)
 
 def load_wilson_coefficients(data):
     """Extract Wilson coefficients from the first row of the DataFrame."""
@@ -45,7 +45,7 @@ def preprocess_features(data):
     return X
 
 def train_on_files(training_dataset, model_path="smeft_model.h5"):
-    data = load_dataset(training_dataset, header=None)
+    data = load_dataset(training_dataset)
     
     # Check if model exists; if not, create a new one
     if os.path.exists(model_path):
