@@ -47,7 +47,7 @@ def train_on_files(path_pattern, model_path="smeft_model.h5"):
             with open(filename, 'r') as f:
                 comment_row = f.readline()  # First line contains Wilson coefficients
                 wilson_coefficients = load_wilson_coefficients(comment_row)
-            data = pd.read_csv(filename, skiprows=1, header=2)
+            data = pd.read_csv(filename, skiprows=1, header=1)
             
             X = data[['HiggsBoson', 'DecayProducts', 'InvMasses', 'pT', 'Rapidity', 'JetMultiplicity']].values
             y = wilson_coefficients
