@@ -25,6 +25,7 @@ def load_wilson_coefficients(data):
     
     # Create a list of coefficients in order
     coefficients = [float(coeff[1]) for coeff in sorted(match, key=lambda x: int(x[0]))]
+    print("NUM WILSONS: ", len(coefficients))
     
     return coefficients
 
