@@ -36,7 +36,7 @@ def update_run_card(file_path, nevents, ebeam):
     with open(file_path, 'w') as file:
         for line in lines:
             # Update the number of events
-            if line.strip().startswith('10000 = nevents'):
+            if line.strip().startswith('25000 = nevents'):
                 line = f"     {nevents} = nevents ! Number of unweighted events requested\n"
             # Update the center-of-mass energy (ebeam1 and ebeam2)
             elif line.strip().startswith('6500.0     = ebeam1'):
@@ -53,5 +53,5 @@ def save_coefficients(file_path, new_coefficients):
 #Generate Wilsons and update the parameter file
 new_coefficients = generate_random_coefficients()
 update_wilson_coefficients('/home/ubuntu/MG5_aMC_v3_6_0/SMEFT_run3/Cards/param_card.dat', new_coefficients)
-update_run_card('/home/ubuntu/MG5_aMC_v3_6_0/SMEFT_run3/Cards/run_card.dat', 25000, 50000)
+update_run_card('/home/ubuntu/MG5_aMC_v3_6_0/SMEFT_run3/Cards/run_card.dat', 10000, 50000)
 save_coefficients('/home/ubuntu/pythia8312/scripts/wilson_coefficients.json', new_coefficients)

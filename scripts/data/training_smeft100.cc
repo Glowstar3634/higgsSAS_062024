@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
     double R = 0.4;
     JetDefinition jet_def(antikt_algorithm, R);
 
-    int nEvents = 25000;
+    int nEvents = 10000;
     int totalHCount = 0;
 
     // Outfile headers
@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
 
 
         for (int j = 0; j < pythia.event.size(); j++) {
-            if ((pythia.event[j].id() == 25 || pythia.event[j].id() == 35 || pythia.event[j].id() == 36 || pythia.event[j].id() == 37) && pythia.event[j].status() == -62) {
+            if ((pythia.event[j].id() == 25 || pythia.event[j].id() == 35 || pythia.event[j].id() == 36 || pythia.event[j].id() == 37 || pythia.event[j].id() == -37) && pythia.event[j].status() == -62) {
                 totalHCount++;
 
                 std::vector<int> decayProducts;

@@ -1,6 +1,9 @@
 #Generate data
 import model SMEFTsim_U35_MwScheme_UFO
 generate p p > h
-
+generate p p > H
+generate p p > A
+generate p p > H+
+generate p p > H-
 output SMEFT_run3
 quit
