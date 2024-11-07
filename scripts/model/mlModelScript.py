@@ -48,11 +48,12 @@ def train_on_files(training_dataset, model_path="smeft_model.h5"):
     print(f"Training on {training_dataset}")
 
     wilson_coefficients = load_wilson_coefficients(data)
+    wilson_coefficients = np.array(wilson_coefficients)
     data = pd.read_csv(training_dataset, skiprows=1)
     print(data.head())
     
     X = data[['HiggsBoson', ' DecayProducts', ' InvMasses', ' pT', ' Rapidity', ' JetMultiplicity']].values
-    y = wilson_coefficients
+    y = np.tile(wilson_coefficients, (X.shape[0], 1))
 
     model.fit(X, y, epochs=50, batch_size=32, validation_split=0.2, verbose=1)
     model.save(model_path)
