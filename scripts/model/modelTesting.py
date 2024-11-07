@@ -8,7 +8,7 @@ import os
 
 def load_dataset(file_path):
     """Load a single CSV file as a DataFrame."""
-    return pd.read_csv(file_path, header=None)
+    return pd.read_csv(file_path, skiprows=1)
 
 def preprocess_features(data):
     # Split DecayProducts into two columns and convert them to floats
@@ -27,6 +27,7 @@ def preprocess_features(data):
 def test_model(testing_dataset, model_path):
     # Load the test dataset and remove the header row
     data = load_dataset(testing_dataset).iloc[1:]
+    print(data.head())
     
     # Load and preprocess features
     data.columns = ['HiggsBoson', ' DecayProducts', ' InvMasses', ' pT', ' Rapidity', ' JetMultiplicity']
