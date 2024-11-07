@@ -11,20 +11,24 @@ def load_dataset(file_path):
     """Load a single CSV file as a DataFrame."""
     return pd.read_csv(file_path)
 
-def load_wilson_coefficients(comment_row):
-    """Extract Wilson coefficients from the comment row."""
-    coefficients = {}
-    match = re.findall(r'(\d):\s*(-?\d+\.\d+)', comment_row)
+def load_wilson_coefficients(data):
+    """Extract Wilson coefficients from the first row of the DataFrame."""
+    # Get the entire first row (assuming the first row contains the coefficients)
+    comment_row = data.iloc[0, :]  # Get the entire first row
     
-    for coeff in match:
-        index = int(coeff[0])
-        value = float(coeff[1])
-        coefficients[index] = value
-        
-    return [coefficients[i] for i in range(1, 10)]
+    # Concatenate all columns in the first row to form a single string
+    comment_string = " ".join(comment_row.astype(str).values)
+    
+    # Use regex to extract all Wilson coefficients
+    match = re.findall(r'(\d):\s*(-?\d+\.\d+)', comment_string)
+    
+    # Create a list of coefficients in order
+    coefficients = [float(coeff[1]) for coeff in sorted(match, key=lambda x: int(x[0]))]
+    
+    return coefficients
 
-def train_on_files(path_pattern, model_path="smeft_model.h5"):
-    all_files = glob.glob(path_pattern)
+def train_on_files(training_dataset, model_path="smeft_model.h5"):
+    data = load_dataset(training_dataset)
     
     # Check if model exists; if not, create a new one
     if os.path.exists(model_path):
@@ -40,24 +44,19 @@ def train_on_files(path_pattern, model_path="smeft_model.h5"):
         ])
         model.compile(optimizer='adam', loss='mse', metrics=['mae'])
 
-    for filename in all_files:
-        try:
-            print(f"Training on {filename}")
-            # Open the file and process the first line for Wilson coefficients
-            with open(filename, 'r') as f:
-                comment_row = f.readline()  # First line contains Wilson coefficients
-                wilson_coefficients = load_wilson_coefficients(comment_row)
-            data = pd.read_csv(filename, skiprows=1, header=1)
-            
-            X = data[['HiggsBoson', 'DecayProducts', 'InvMasses', 'pT', 'Rapidity', 'JetMultiplicity']].values
-            y = wilson_coefficients
+    
+    print(f"Training on {filename}")
 
-            model.fit(X, y, epochs=50, batch_size=32, validation_split=0.2, verbose=1)
-            model.save(model_path)
-            print(f"Model saved after training on {filename}")
-        
-        except Exception as e:
-            print(f"Error processing {filename}: {e}")
+    wilson_coefficients = load_wilson_coefficients(data)
+    data = pd.read_csv(filename, skiprows=1, header=1)
+    print(data.head())
+    
+    X = data[['HiggsBoson', 'DecayProducts', 'InvMasses', 'pT', 'Rapidity', 'JetMultiplicity']].values
+    y = wilson_coefficients
+
+    model.fit(X, y, epochs=50, batch_size=32, validation_split=0.2, verbose=1)
+    model.save(model_path)
+    print(f"Model saved after training on {filename}")
 
 def main(training_dataset, model_path):
     train_on_files(training_dataset, model_path)
