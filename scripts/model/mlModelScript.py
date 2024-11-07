@@ -5,10 +5,23 @@ import pandas as pd
 import glob
 import os
 import sys
+import re
 
 def load_dataset(file_path):
     """Load a single CSV file as a DataFrame."""
-    return pd.read_csv(file_path, skiprows=0, header=1)
+    return pd.read_csv(file_path)
+
+def load_wilson_coefficients(comment_row):
+    """Extract Wilson coefficients from the comment row."""
+    coefficients = {}
+    match = re.findall(r'(\d):\s*(-?\d+\.\d+)', comment_row)
+    
+    for coeff in match:
+        index = int(coeff[0])
+        value = float(coeff[1])
+        coefficients[index] = value
+        
+    return [coefficients[i] for i in range(1, 10)]
 
 def train_on_files(path_pattern, model_path="smeft_model.h5"):
     all_files = glob.glob(path_pattern)
@@ -30,11 +43,14 @@ def train_on_files(path_pattern, model_path="smeft_model.h5"):
     for filename in all_files:
         try:
             print(f"Training on {filename}")
-            data = pd.read_csv(filename, skiprows=2, header=0)
+            # Open the file and process the first line for Wilson coefficients
+            with open(filename, 'r') as f:
+                comment_row = f.readline()  # First line contains Wilson coefficients
+                wilson_coefficients = load_wilson_coefficients(comment_row)
+            data = pd.read_csv(filename, skiprows=1, header=2)
             
             X = data[['HiggsBoson', 'DecayProducts', 'InvMasses', 'pT', 'Rapidity', 'JetMultiplicity']].values
-            y = data[['Coefficient1', 'Coefficient2', 'Coefficient3', 'Coefficient4', 'Coefficient5',
-                      'Coefficient6', 'Coefficient7', 'Coefficient8', 'Coefficient9']].values
+            y = wilson_coefficients
 
             model.fit(X, y, epochs=50, batch_size=32, validation_split=0.2, verbose=1)
             model.save(model_path)
