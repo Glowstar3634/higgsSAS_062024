@@ -34,7 +34,7 @@ def test_model(testing_dataset, model_path):
     X_test = preprocess_features(data)
     
     # Load the trained model
-    model = load_model(model_path, custom_objects={'mse': tf.keras.losses.mean_squared_error})
+    model = load_model(model_path, custom_objects={'mse': tf.keras.losses.MeanSquaredError})
     
     # Predict Wilson coefficients
     predictions = model.predict(X_test)
